@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Modal } from '@heroui/modal';
 import EditMember from '@/components/edit_member';
 import EditOrganization from '@/components/organization';
+import UsersTable from '@/components/users_table';
 
 
 
@@ -53,6 +54,7 @@ export default function WebApp() {
       title: 'Client Management',
       description: 'Manage clients, contacts, and communication logs.',
       className: 'md:col-span-2 bg-gradient-to-br from-yellow-50 to-yellow-100',
+      component: <UsersTable />
     },
     {
       title: 'Reporting',
@@ -60,10 +62,25 @@ export default function WebApp() {
       className: 'bg-gradient-to-br from-red-50 to-red-100',
     },
     {
-      title: 'Notifications',
-      description: 'Set and manage notifications for system events.',
+      title: 'Billing',
+      description: 'Manage billings of organization, including payment methods, subscription plans, and invoicing options.',
       className: 'bg-gradient-to-br from-pink-50 to-pink-100',
     },
+    {
+      title: 'Screenshots',
+      description: 'Update or Delete Screenshots',
+      className: 'bg-gradient-to-br from-pink-50 to-pink-100',
+    },
+    {
+      title: 'Attendance',
+      description: 'Manage Attendance of a User.',
+      className: 'bg-gradient-to-br from-pink-50 to-pink-100',
+    },
+    {
+      title: 'Timelogs',
+      description: 'Manage Timelogs of a User.',
+      className: 'md:col-span-2 bg-gradient-to-br from-pink-50 to-pink-100',
+    },    
   ];
 
   return (

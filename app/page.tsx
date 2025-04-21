@@ -7,6 +7,7 @@ import { SiNestjs } from "react-icons/si";
 import HetznerMetrics from "@/components/hetzner-metrics";
 import { Card } from "@heroui/card";
 import PingComponent from "@/components/pinger";
+import Link from "next/link";
 
 export default async function Home() {
   // Await the cookies
@@ -39,18 +40,24 @@ export default async function Home() {
       </div>
 
       <div className="flex gap-3 flex-wrap justify-center">
-        <Button variant="shadow" className="rounded-full px-6 py-2">
-          <FaAngular />
-          Web App
-        </Button>
-        <Button variant="shadow" className="rounded-full px-6 py-2">
-          <IoLogoElectron />
-          Software
-        </Button>
-        <Button variant="shadow" className="rounded-full px-6 py-2">
-          <SiNestjs />
-          Websockets
-        </Button>
+          <Link href="/web-app">
+            <Button variant="shadow" className="rounded-full px-6 py-2">
+              <FaAngular />
+              Web App
+            </Button>
+          </Link>
+          <Link href="/">
+            <Button variant="shadow" className="rounded-full px-6 py-2">
+                <IoLogoElectron />
+                Software
+            </Button>
+          </Link>
+          <Link href="/websocket">
+            <Button variant="shadow" className="rounded-full px-6 py-2">
+                <SiNestjs />
+                Websockets
+            </Button>
+          </Link>
       </div>
       <section>
         <Card>
@@ -58,7 +65,7 @@ export default async function Home() {
         </Card>
       </section>
       <section>
-        <Card>
+        <Card className="p-4">
           <PingComponent />
         </Card>
       </section>

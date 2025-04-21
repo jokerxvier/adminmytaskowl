@@ -76,13 +76,7 @@ export const Navbar = () => {
            {siteConfig.navItems.map((item, index) => (
             <NavbarMenuItem key={`${item.label}-${index}`}>
               <Link
-                color={
-                  index === 2
-                    ? "primary"
-                    : index === siteConfig.navItems.length - 1
-                      ? "danger"
-                      : "foreground"
-                }
+                color='primary'
                 href={item.href}
                 size="lg"
                 className="flex items-center gap-2" // Add some spacing

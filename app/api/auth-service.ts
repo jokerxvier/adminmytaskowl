@@ -11,10 +11,8 @@ export async function login(email: string, password: string) {
   
     if (res.ok) {
         const data = await res.json();
-    
         // Set the token as a cookie in the browser
         const token = data.authorisation.token;
-        
         // Set the token in a cookie, with HttpOnly and Secure flags if needed
         document.cookie = `access_token=${token}; path=/; max-age=3600`;  // Set cookie for 1 hour
     

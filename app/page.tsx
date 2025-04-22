@@ -8,6 +8,7 @@ import HetznerMetrics from "@/components/hetzner-metrics";
 import { Card } from "@heroui/card";
 import PingComponent from "@/components/pinger";
 import Link from "next/link";
+import SuperAdminDashboard from "@/components/DashboardCount";
 
 export default async function Home() {
   // Await the cookies
@@ -39,7 +40,7 @@ export default async function Home() {
         </p>
       </div>
 
-      <div className="flex gap-3 flex-wrap justify-center">
+      <div className="flex gap-3 flex-wrap justify-center mb-8">
           <Link href="/web-app">
             <Button variant="shadow" className="rounded-full px-6 py-2">
               <FaAngular />
@@ -56,7 +57,7 @@ export default async function Home() {
             <Button variant="shadow" className="rounded-full px-6 py-2">
                 <SiNestjs />
                 Websockets
-            </Button>
+            </Button> 
           </Link>
       </div>
       <section>
@@ -68,6 +69,9 @@ export default async function Home() {
         <Card className="p-4">
           <PingComponent />
         </Card>
+      </section>
+      <section>
+        <SuperAdminDashboard />
       </section>
     </section>
 

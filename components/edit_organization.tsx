@@ -7,6 +7,8 @@ import {
 } from "@heroui/table";
 import { Pagination } from "@heroui/pagination";
 import { format } from "date-fns";
+import { Button } from "@heroui/button";
+import { Card } from "@heroui/card";
 
 const userColumns = [
   { key: "name", label: "User Name" },
@@ -84,13 +86,42 @@ const OrganizationSearch = () => {
         );
       };
 
+  const getStatusLabel = (status: number) => {
+    switch (status) {
+      case 0:
+        return "Not Started";
+      case 1:
+        return "Completed";
+      case 2:
+        return "In Progress";
+      default: 
+        return "N/A";
+    };
+  }
   const makeProjectRows = () =>
     organization?.projects?.map((p: any, idx: number) => ({
       key: idx.toString(),
       title: p.name,
-      status: p.status,
+      status: getStatusLabel(p.status) ,
       client: p.client?.name || "N/A",
+      actions: (
+        <div style={{ display: "flex", gap: "8px" }}> {/* Adjusting space between buttons */}
+          <Button 
+            variant="light"
+            size="sm"
+          >
+            Edit
+          </Button>
+          <Button 
+            variant="light"
+            size="sm"
+          >
+            Delete
+          </Button>
+        </div>
+      ),
     })) || [];
+
 
   const renderTable = (title: string, columns: any[], rows: any[], currentPageKey: keyof typeof page) => {
     const totalPages = Math.ceil(rows.length / rowsPerPage);
@@ -132,6 +163,7 @@ const OrganizationSearch = () => {
   };
 
   return (
+    <Card className="my-4 p-4">
     <div className="p-6 space-y-6">
       <h1 className="text-3xl font-bold">Search Organizations</h1>
 
@@ -156,20 +188,27 @@ const OrganizationSearch = () => {
         <div className="space-y-6">
           <h2 className="text-2xl font-semibold">Organization Details</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input value={organization.organization_id} label="Organization ID" readOnly />
             <Input value={organization.name} label="Name" readOnly />
-            <Input value={organization.organization_address} label="Address" readOnly />
-            <Input value={organization.email} label="Email" readOnly />
-            <Input value={organization.industry} label="Industry" readOnly />
-            <Input value={organization.phone} label="Phone" readOnly />
-            <Input value={organization.website} label="Website" readOnly />
-            <Input value={organization.country} label="Country" readOnly />
-            <Input value={organization.state} label="State" readOnly />
-            <Input value={organization.city} label="City" readOnly />
-            <Input value={organization.zip_code?.toString()} label="Zip Code" readOnly />
-            <Input value={organization.founded} label="Founded" readOnly />
-            <Input value={organization.language} label="Language" readOnly />
-            <Input value={organization.timezone} label="Timezone" readOnly />
-            <Input value={format(new Date(organization.created_at), "MMMM dd, yyyy")} label="Created at" readOnly />
+            <Input value={organization.organization_address} label="Address" />
+            <Input value={organization.email} label="Email"  />
+            <Input value={organization.industry} label="Industry"  />
+            <Input value={organization.phone} label="Phone"  />
+            <Input value={organization.website} label="Website"  />
+            <Input value={organization.country} label="Country"  />
+            <Input value={organization.state} label="State"  />
+            <Input value={organization.city} label="City"  />
+            <Input value={organization.zip_code?.toString()} label="Zip Code"  />
+            <Input value={organization.founded} label="Founded"  />
+            <Input value={organization.language} label="Language" />
+            <Input value={organization.timezone} label="Timezone" />
+            <Input value={format(new Date(organization.created_at), "MMMM dd, yyyy")} label="Created at"  />
+            <Button
+            variant="solid"
+            size="lg"
+            color="secondary">
+              Save Changes
+            </Button>
           </div>
 
           {/* User Table */}
@@ -184,6 +223,8 @@ const OrganizationSearch = () => {
         </div>
       )}
     </div>
+    </Card>
+
   );
 };
 

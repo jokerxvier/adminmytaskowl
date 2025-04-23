@@ -31,3 +31,41 @@ export async function searchUser(query: string) {
 }
 
 
+export async function editUser(user: any) {
+  const token = getTokenFromCookies();
+
+  if (!token) {
+    throw new Error("Unauthorized: No access token found.");
+  } 
+
+  const res = await fetch(`${GlobalSettings.BASE_URL}super-admin/editUser`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(user),
+  }); 
+}
+
+export async function removeUserFromOrg(org:any){
+  const token = getTokenFromCookies();
+
+  if (!token) {
+    throw new Error("Unauthorized: No access token found.");
+  } 
+
+  const res = await fetch(`${GlobalSettings.BASE_URL}super-admin/removeUserFromOrg`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(org),
+  }); 
+}
+
+
+

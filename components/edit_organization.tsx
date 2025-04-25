@@ -1,10 +1,8 @@
 'use client';
 import { useState, useMemo } from "react";
-import { searchOrg, updateOrgAdmin, removeUserFromDirectlyFromOrg, updateUserRoleAdmin } from "@/app/api/organization-service";
+import { searchOrg, updateOrgAdmin, removeUserFromDirectlyFromOrg, updateUserRoleAdmin, updateTask, updateProject, updateTeam } from "@/app/api/organization-service";
 import { Input } from "@heroui/input";
-import {
-  Table, TableHeader, TableColumn, TableBody, TableRow, TableCell
-} from "@heroui/table";
+import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell} from "@heroui/table";
 import { Pagination } from "@heroui/pagination";
 import { format } from "date-fns";
 import { Button } from "@heroui/button";
@@ -15,7 +13,8 @@ import { languages } from "@/common/select-data/language";
 import { Country } from "@/common/select-data/countries";
 import { timezones } from "@/common/select-data/timezone";
 import { IoPersonRemove } from "react-icons/io5";
-import { FaRegTrashAlt } from "react-icons/fa";
+import { FaCheckSquare, FaEdit, FaRegTrashAlt, FaTimes } from "react-icons/fa";
+import { PasswordVerifyModal } from "./verifyPassword";
 
 
 
@@ -26,18 +25,23 @@ const userColumns = [
 ];
 
 const teamColumns = [
+  { key: "team_id", label: "Team ID" },
   { key: "name", label: "Team Name" },
 ];
 
 const taskColumns = [
+  { key: "task_id", label: "Task ID" },
   { key: "name", label: "Name" },
   { key: "deadline", label: "Deadline" },
+  { key: "actions", label: "Actions" },
 ];
 
 const projectColumns = [
+  { key: "project_id", label: "Project ID" },
   { key: "title", label: "Project Title" },
   { key: "status", label: "Status" },
   { key: "client", label: "Client" },
+  { key: "actions", label: "Actions" },
 ];
 
 const countryOptions = Object.entries(Country).map(([key, value]) => ({
@@ -49,7 +53,7 @@ const countryOptions = Object.entries(Country).map(([key, value]) => ({
 const OrganizationSearch = () => {
   const [query, setQuery] = useState("");
   const [organization, setOrganization] = useState<any>(null);
-  const [editableOrg, setEditableOrg] = useState<any>(null); // 👈 added
+  const [editableOrg, setEditableOrg] = useState<any>(null); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState({ users: 1, teams: 1, tasks: 1, projects: 1 });
@@ -109,89 +113,371 @@ const OrganizationSearch = () => {
       )
     })) || [];
 
-    const handleRoleChange = (email: string, newRole: string, orgID: number) => {
-      // Update both organization and editableOrg states
-      updateUserRoleAdmin(email, newRole, orgID)
-      setOrganization((prev:any) => ({
-        ...prev,
-        users: prev.users.map((user:any) => 
-          user.email === email ? { ...user, role: newRole } : user
-        )
-      }));
-      
-      setEditableOrg((prev:any) => ({
-        ...prev,
-        users: prev.users.map((user:any) => 
-          user.email === email ? { ...user, role: newRole } : user
-        )
-      }));
+    const [editingProject, setEditingProject] = useState<{
+      id: string;
+      name: string;
+      deadline: string;
+    } | null>(null);
+    const makeProjectRows = () => {
+      if (!organization?.projects) return [];
+    
+      return organization.projects.map((p: any, idx: number) => {
+        const isEditing = editingProject?.id === `${p.name}-${idx}`;
+        return {
+          key: `${p.name}-${idx}`,
+          project_id: p.project_id,
+          title: isEditing ? (
+            <Input
+              value={editingProject.name}
+              onChange={(e) =>
+                setEditingProject({ ...editingProject, name: e.target.value })
+              }
+              size="sm"
+            />
+          ) : (
+            p.name
+          ),
+          status: getStatusLabel(p.status),
+          client: p.client?.name || "N/A",
+          actions: (
+            <div className="flex gap-2">
+              {isEditing ? (
+                <>
+                  <Button
+                    variant="light"
+                    size="sm"
+                    onClick={() => {
+                      requirePasswordVerification(async () => {
+                        updateProject({
+                          ...p,
+                          name: editingProject.name,
+                        });
+                        handleSearch();
+                        setEditingProject(null);
+                      }, `Edit ${p.name}`)
+                    }}
+                    startContent={<FaCheckSquare />}
+                  >
+                    Save
+                  </Button>
+                  <Button
+                    variant="light"
+                    size="sm"
+                    onClick={() => setEditingProject(null)}
+                    startContent={<FaTimes />}
+                  >
+                    Cancel
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="light"
+                    size="sm"
+                    onClick={() =>
+                      setEditingProject({
+                        id: `${p.name}-${idx}`,
+                        name: p.name,
+                        deadline: "", // optional if you have it
+                      })
+                    }
+                    startContent={<FaEdit />}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="light"
+                    size="sm"
+                    onClick={() => handleDeleteProject(p)}
+                    startContent={<FaRegTrashAlt />}
+                  >
+                    Delete
+                  </Button>
+                </>
+              )}
+            </div>
+          ),
+        };
+      });
     };
+    
 
-const makeTeamRows = () =>
-  organization?.teams?.map((t: any, idx: number) => ({
-    key: idx.toString(),
-    name: t.name,
-    Actions: (
-        <Button variant="light" size="sm" onClick={() => handleRemoveTeam(t)} startContent={<FaRegTrashAlt />}>
-          Delete
-        </Button>
-    ),
-  })) || [];
+    const [editingTeam, setEditingTeam] = useState<{
+      id: string;
+      name: string;
+    } | null>(null);
+
+    const makeTeamRows = () =>
+      organization?.teams?.map((team: any, idx: number) => {
+        const isEditing = editingTeam?.id === `${team.name}-${idx}`;
+        return {
+          key: `${team.name}-${idx}`,
+          team_id: team.team_id,
+          name: isEditing ? (
+            <Input
+              value={editingTeam.name}
+              onChange={(e) =>
+                setEditingTeam({ ...editingTeam, name: e.target.value })
+              }
+              size="sm"
+            />
+          ) : (
+            team.name
+          ),
+          Actions: (
+            <div className="flex gap-2">
+              {isEditing ? (
+                <>
+                  <Button
+                    variant="light"
+                    size="sm"
+                    onClick={() => {
+                      requirePasswordVerification(async () => {
+                        updateTeam({
+                          ...team,
+                          name: editingTeam.name,
+                        });
+                        handleSearch();
+                        setEditingTeam(null);
+                      },`Edit ${team.name}`)
+                    }}
+                    startContent={<FaCheckSquare />}
+                  >
+                    Save
+                  </Button>
+                  <Button
+                    variant="light"
+                    size="sm"
+                    onClick={() => setEditingTeam(null)}
+                    startContent={<FaTimes />}
+                  >
+                    Cancel
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="light"
+                    size="sm"
+                    onClick={() =>
+                      setEditingTeam({
+                        id: `${team.name}-${idx}`,
+                        name: team.name,
+                      })
+                    }
+                    startContent={<FaEdit />}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="light"
+                    size="sm"
+                    onClick={() => handleRemoveTeam(team)}
+                    startContent={<FaRegTrashAlt />}
+                  >
+                    Delete
+                  </Button>
+                </>
+              )}
+            </div>
+          ),
+        };
+      }) || [];
+    
+
+  const [editingTask, setEditingTask] = useState<{
+    id: string;
+    name: string;
+    deadline: string;
+  } | null>(null);
 
   const makeTaskRows = () => {
     if (!organization?.projects) return [];
   
-    return organization.projects.flatMap((project: any) =>
-      project.tasks?.map((task: any, idx: number) => ({
-        key: `${project.name}-${idx}`,
-        project: project.name,
-        name: task.name,
-        deadline: task.deadline,
-        Actions: (
-            <Button variant="light" size="sm" onClick={() => handleDeleteTask(task)} startContent={<FaRegTrashAlt />}>
-              Delete
-            </Button>
-        ),
-      })) || []
-    );
+      return organization.projects.flatMap((project: any) =>
+      project.tasks?.map((task: any, idx: number) => {
+        const isEditing = editingTask?.id === `${project.name}-${idx}`;
+          return {
+            key: `${project.name}-${idx}`,
+            task_id: task.task_id,
+            name: isEditing ? (
+              <Input
+                value={editingTask.name}
+                onChange={(e) => setEditingTask({
+                  ...editingTask,
+                  name: e.target.value
+                })}
+                size="sm"
+              />
+            ) : (
+              task.name
+            ),
+            deadline: isEditing ? (
+              <Input
+                type="date"
+                value={editingTask.deadline}
+                onChange={(e) => setEditingTask({
+                  ...editingTask,
+                  deadline: e.target.value
+                })}
+                size="sm"
+              />
+            ) : (
+              task.deadline
+            ),
+            Actions: (
+              <div className="flex gap-2">
+                {isEditing ? (
+                  <>
+                    <Button
+                      variant="light"
+                      size="sm"
+                      onClick={() => {
+                        requirePasswordVerification(async () => {
+                          updateTask({
+                            ...task,
+                            name: editingTask.name,
+                            deadline: editingTask.deadline
+                          });
+                          handleSearch()
+                          setEditingTask(null);
+                        }, `Edit ${task.name}`)
+                       
+                      }}
+                      startContent={<FaCheckSquare />}
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      variant="light"
+                      size="sm"
+                      onClick={() => setEditingTask(null)}
+                      startContent={<FaTimes />}
+                    >
+                      Cancel
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      variant="light"
+                      size="sm"
+                      onClick={() => setEditingTask({
+                        id: `${project.name}-${idx}`,
+                        name: task.name,
+                        deadline: task.deadline
+                      })}
+                      startContent={<FaEdit />}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="light"
+                      size="sm"
+                      onClick={() => handleDeleteTask(task)}
+                      startContent={<FaRegTrashAlt />}
+                    >
+                      Delete
+                    </Button>
+                  </>
+                )}
+              </div>
+            )
+          };
+        }) || []
+      );
+
+    };
+
+    // Password verification state
+    const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
+    const [pendingAction, setPendingAction] = useState<{
+      action: () => Promise<void>;
+      description: string;
+    } | null>(null);
+  
+    // Helper function to require password verification
+    const requirePasswordVerification = (action: () => Promise<void>, description: string) => {
+      setPendingAction({ action, description });
+      setIsVerifyModalOpen(true);
+    };
+  
+    // Modified handlers with password verification
+    const handleSaveChanges = () => {
+      requirePasswordVerification(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+          const updatedOrg = await updateOrgAdmin(editableOrg);
+          setOrganization(updatedOrg);
+          setEditableOrg(updatedOrg);
+        } catch (err: any) {
+          setError(err.message || "Failed to save changes");
+        } finally {
+          setLoading(false);
+        }
+      }, "save organization changes");
+    };
+  
+    const handleRemoveFromOrg = (email: any, orgID: any) =>
+      requirePasswordVerification(async () => {
+        try {
+          setLoading(true);
+          await removeUserFromDirectlyFromOrg(email, orgID);
+          await handleSearch();
+    
+        } catch (error) {
+          console.error("Edit failed:", error);
+        } finally {
+          setLoading(false);
+        }
+      }, "handle remove org")
+       
+      
+  
+    const handleRoleChange = (email: string, newRole: string, orgID: number) => {
+      requirePasswordVerification(async () => {
+        await updateUserRoleAdmin(email, newRole, orgID);
+        setOrganization((prev:any) => ({
+          ...prev,
+          users: prev.users.map((user:any) => 
+            user.email === email ? { ...user, role: newRole } : user
+          )
+        }));
+        setEditableOrg((prev:any) => ({
+          ...prev,
+          users: prev.users.map((user:any) => 
+            user.email === email ? { ...user, role: newRole } : user
+          )
+        }));
+      }, `change ${email}'s role to ${newRole}`);
+    };
+  
+
+
+  const handleEditProject = (project: any) => {
+    console.log(`Editing project: ${project.name}`);
   };
 
-  const handleRemoveUser = (userEmail: string) => {
-  // Logic to remove user from organization
-  console.log(`Removing user with email: ${userEmail}`);
-  // Update state accordingly
-};
+  const handleDeleteProject = (project: any) => {
+    console.log(`Deleting project: ${project.name}`);
+  };
+
+  const handleEditTeam = (team: any) => {
+    console.log(`Removing team: ${team.name}`);
+  };
+  const handleRemoveTeam = (team: any) => {
+    console.log(`Removing team: ${team.name}`);
+  };
+
+  const handleEditTask = (task: any) => {
+    console.log(`Deleting task: ${task.name}`);
+  };
+  const handleDeleteTask = (task: any) => {
+    console.log(`Deleting task: ${task.name}`);
+  };
 
 
-const handleEditProject = (project: any) => {
-  console.log(`Editing project: ${project.name}`);
-};
-
-const handleDeleteProject = (project: any) => {
-  console.log(`Deleting project: ${project.name}`);
-};
-
-const handleRemoveTeam = (team: any) => {
-  console.log(`Removing team: ${team.name}`);
-};
-
-const handleDeleteTask = (task: any) => {
-  console.log(`Deleting task: ${task.name}`);
-};
-
-const handleRemoveFromOrg = async (email: any, orgID: any) =>
-{
-  try {
-    setLoading(true);
-    await removeUserFromDirectlyFromOrg(email, orgID);
-    await handleSearch();
-
-  } catch (error) {
-    console.error("Edit failed:", error);
-  } finally {
-    setLoading(false);
-  }
-}
 
   const getStatusLabel = (status: number) => {
     switch (status) {
@@ -208,33 +494,15 @@ const handleRemoveFromOrg = async (email: any, orgID: any) =>
 
 
 
-  const makeProjectRows = () =>
-    organization?.projects?.map((p: any, idx: number) => ({
-      key: idx.toString(),
-      title: p.name,
-      status: getStatusLabel(p.status),
-      client: p.client?.name || "N/A",
-      actions: (
-        <div style={{ display: "flex", gap: "8px" }}>
-          <Button variant="light" size="sm" onClick={() => handleEditProject(p)}>
-            Edit
-          </Button>
-          <Button variant="light" size="sm" onClick={() => handleDeleteProject(p)}>
-            Delete
-          </Button>
-        </div>
-      ),
-    })) || [];
+
 
 
     const renderTable = (title: string, columns: any[], rows: any[], currentPageKey: keyof typeof page) => {
-      const totalPages = Math.ceil(rows.length / rowsPerPage);
-      const paginated = getPaginatedRows(rows, page[currentPageKey]);
-    
-      // Add Actions column if the rows have Actions
-      const hasActions = paginated.some(row => row.Actions);
-      const allColumns = hasActions ? [...columns, { key: "Actions", label: "Actions" }] : columns;
-    
+    const totalPages = Math.ceil(rows.length / rowsPerPage);
+    const paginated = getPaginatedRows(rows, page[currentPageKey]);
+    const hasActions = paginated.some(row => row.Actions);
+    const allColumns = hasActions ? [...columns, { key: "Actions", label: "Actions" }] : columns;
+  
       return (
         <div className="space-y-3">
           <h2 className="text-xl font-semibold">{title}</h2>
@@ -385,20 +653,7 @@ const handleRemoveFromOrg = async (email: any, orgID: any) =>
   );
 
 
-  const handleSaveChanges = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const updatedOrg = await updateOrgAdmin(editableOrg);
-      setOrganization(updatedOrg);  // Update local organization state with the saved changes
-      setEditableOrg(updatedOrg);  // Update the editableOrg state as well
-      handleSearch();
-    } catch (err: any) {
-      setError(err.message || "An error occurred while saving changes.");
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   const handleInputChange = (field: string, value: string) => {
     setEditableOrg((prev: any) => ({
@@ -439,15 +694,23 @@ const handleRemoveFromOrg = async (email: any, orgID: any) =>
           {/* User Table */}
           {renderTable("Users", userColumns, makeUserRows(), "users")}
           {renderTable("Projects", projectColumns, makeProjectRows(), "projects")}
-
-          {/* Grid of 3 tables: Teams, Tasks, Projects */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {renderTable("Teams", teamColumns, makeTeamRows(), "teams")}
-            {renderTable("Tasks", taskColumns, makeTaskRows(), "tasks")}
-          </div>
-        </div>
+          {renderTable("Teams", teamColumns, makeTeamRows(), "teams")}
+          {renderTable("Tasks", taskColumns, makeTaskRows(), "tasks")}
+      </div>
       )}
     </div>
+    
+    <PasswordVerifyModal
+        isOpen={isVerifyModalOpen}
+        onOpenChange={setIsVerifyModalOpen}
+        onVerified={() => {
+          if (pendingAction) {
+            pendingAction.action();
+          }
+        }}
+        title="Confirm Action"
+        description={pendingAction?.description || ""}
+      />
     </Card>
 
   );

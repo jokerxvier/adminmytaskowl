@@ -9,6 +9,7 @@ import { Table, TableHeader, TableBody, TableRow, TableColumn, TableCell } from 
 import { Divider } from "@heroui/divider";
 import { IoPersonRemove } from "react-icons/io5";
 import { Card } from "@heroui/card";
+import { PasswordVerifyModal } from "./verifyPassword";
 
 
 interface Member {
@@ -84,30 +85,44 @@ const EditMember: React.FC = () => {
     { key: "actions", label: "Actions" },
   ];
 
-  const handleRemove = async (org: any) =>
-  {
-    try {
-      setLoading(true);
-      await removeUserFromOrg(org);
-      await handleSearch();
+  const handleRemove = (org: any) =>
+    requirePasswordVerification(async () => {
+      try {
+        setLoading(true);
+        await removeUserFromOrg(org);
+        await handleSearch();
+  
+      } catch (error) {
+        console.error("Edit failed:", error);
+      } finally {
+        setLoading(false);
+      }
+    }, `Remove or Readd from ${org.name}`)
 
-    } catch (error) {
-      console.error("Edit failed:", error);
-    } finally {
-      setLoading(false);
-    }
-  }
+    const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
+    const [pendingAction, setPendingAction] = useState<{
+      action: () => Promise<void>;
+      description: string;
+    } | null>(null);
 
-  const handleEdit = async (user: any) => {
-    try {
-      setLoading(true);
-      await editUser(user);
-    } catch (error) {
-      console.error("Edit failed:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    // Helper function to require password verification
+    const requirePasswordVerification = (action: () => Promise<void>, description: string) => {
+      setPendingAction({ action, description });
+      setIsVerifyModalOpen(true);
+    };
+    
+    const handleEdit = (user: any) => 
+      requirePasswordVerification(async () => {
+        try {
+          setLoading(true);
+          await editUser(user);
+        } catch (error) {
+          console.error("Edit failed:", error);
+        } finally {
+          setLoading(false);
+        }
+      }, `Edit ${user.name}'s information`)
+      
   
 
 
@@ -244,8 +259,20 @@ const EditMember: React.FC = () => {
                 )}
               </div>
             </Form>
+            
           </Card>
         )}
+        <PasswordVerifyModal
+                isOpen={isVerifyModalOpen}
+                onOpenChange={setIsVerifyModalOpen}
+                onVerified={() => {
+                  if (pendingAction) {
+                    pendingAction.action();
+                  }
+                }}
+                title="Confirm Action"
+                description={pendingAction?.description || ""}
+              />
       </div>
 
   );

@@ -114,4 +114,78 @@ export async function removeUserFromDirectlyFromOrg(email: string, orgID: number
   return await res.json();
 }
 
+export async function updateTask(task:any) {
+  const token = getTokenFromCookies();
+
+  if (!token) {
+    throw new Error("Unauthorized: No access token found.");
+  }
+
+  const res = await fetch(`${GlobalSettings.BASE_URL}super-admin/editTaskAdmin`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      "Accept": "application/json",
+    },
+    body: JSON.stringify({ task }),
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData?.message || "Failed to search user.");
+  }
+
+  return await res.json();
+}
+
+export async function updateProject(project:any) {
+  const token = getTokenFromCookies();
+
+  if (!token) {
+    throw new Error("Unauthorized: No access token found.");
+  }
+
+  const res = await fetch(`${GlobalSettings.BASE_URL}super-admin/updateProjectAdmin`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      "Accept": "application/json",
+    },
+    body: JSON.stringify({ project }),
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData?.message || "Failed to search user.");
+  }
+
+  return await res.json();
+}
+
+export async function updateTeam(team:any) {
+  const token = getTokenFromCookies();
+
+  if (!token) {
+    throw new Error("Unauthorized: No access token found.");
+  }
+
+  const res = await fetch(`${GlobalSettings.BASE_URL}super-admin/updateTeamAdmin`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      "Accept": "application/json",
+    },
+    body: JSON.stringify({ team }),
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData?.message || "Failed to search user.");
+  }
+
+  return await res.json();
+}
 

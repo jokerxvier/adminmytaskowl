@@ -30,6 +30,7 @@
     "@heroui/progress": "^2.2.13",
     "@heroui/select": "^2.4.17",
     "@heroui/snippet": "2.2.18",
+    "@heroui/spinner": "^2.2.14",
     "@heroui/switch": "2.2.15",
     "@heroui/system": "2.4.13",
     "@heroui/table": "^2.2.16",

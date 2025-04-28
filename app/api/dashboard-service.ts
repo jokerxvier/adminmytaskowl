@@ -42,7 +42,7 @@ export async function getTotalScreenshots() {
   return fetchWithAuth("totalScreenshots");
 }
 export async function totalClockInsToday() {
-    return fetchWithAuth("totalScreenshots");
+    return fetchWithAuth("totalClockInsToday");
   }
 
 export async function totalNewUsersThisMonth(){

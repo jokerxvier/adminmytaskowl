@@ -189,3 +189,43 @@ export async function updateTeam(team:any) {
   return await res.json();
 }
 
+
+export async function toggleStatus(
+  model: 'organization' | 'project' | 'team' | 'task',
+  id: number,
+  organization_id: number
+): Promise<{ status: string; message: string; new_status: number; data: any }> {
+  const token = getTokenFromCookies();
+  
+  if (!token) {
+    throw new Error("Unauthorized: No access token found.");
+  }
+
+  try {
+    const res = await fetch(`${GlobalSettings.BASE_URL}super-admin/toggleStatusAdmin`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+        "Accept": "application/json",
+      },
+      body: JSON.stringify({ 
+        model_type: model,
+        id: id,
+        organization_id: organization_id,
+      }),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData?.message || `Failed to toggle status (HTTP ${res.status})`);
+    }
+
+    return await res.json();
+    
+  } catch (error) {
+    console.error('Error in toggleStatus:', error);
+    throw new Error(error instanceof Error ? error.message : 'Failed to toggle status');
+  }
+}
+

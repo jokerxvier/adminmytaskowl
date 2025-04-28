@@ -1,6 +1,5 @@
 'use client';
 import { useState, useMemo } from "react";
-import { searchOrg, updateOrgAdmin, removeUserFromDirectlyFromOrg, updateUserRoleAdmin, updateTask, updateProject, updateTeam } from "@/app/api/organization-service";
 import { Input } from "@heroui/input";
 import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell} from "@heroui/table";
 import { Pagination } from "@heroui/pagination";
@@ -13,8 +12,17 @@ import { languages } from "@/common/select-data/language";
 import { Country } from "@/common/select-data/countries";
 import { timezones } from "@/common/select-data/timezone";
 import { IoPersonRemove } from "react-icons/io5";
-import { FaCheckSquare, FaEdit, FaRegTrashAlt, FaTimes } from "react-icons/fa";
+import { FaCheckSquare, FaEdit, FaRegTrashAlt, FaTimes, FaUndo } from "react-icons/fa";
 import { PasswordVerifyModal } from "./verifyPassword";
+import { 
+  searchOrg, 
+  updateOrgAdmin, 
+  removeUserFromDirectlyFromOrg, 
+  updateUserRoleAdmin, 
+  updateTask, 
+  updateProject, 
+  updateTeam, 
+  toggleStatus } from "@/app/api/organization-service";
 
 
 
@@ -135,7 +143,9 @@ const OrganizationSearch = () => {
               size="sm"
             />
           ) : (
-            p.name
+            <span className={p.is_deleted ? "line-through" : ""}>
+              {p.name}
+            </span>
           ),
           status: getStatusLabel(p.status),
           client: p.client?.name || "N/A",
@@ -189,9 +199,10 @@ const OrganizationSearch = () => {
                     variant="light"
                     size="sm"
                     onClick={() => handleDeleteProject(p)}
-                    startContent={<FaRegTrashAlt />}
+                    startContent={p.is_deleted === 1 ? <FaUndo /> : <FaRegTrashAlt />}
+                    color={p.is_deleted === 1 ? "success" : "danger"}
                   >
-                    Delete
+                    {p.is_deleted === 1 ? 'Restore' : 'Delete'}
                   </Button>
                 </>
               )}
@@ -222,7 +233,13 @@ const OrganizationSearch = () => {
               size="sm"
             />
           ) : (
-            team.name
+            <span 
+            className={team.is_deleted ? "line-through text-gray-400" : ""}
+            style={team.is_deleted ? { textDecoration: 'line-through' } : {}}
+          >
+            {team.name}
+            {team.is_deleted && <span className="ml-2 text-xs text-red-500">(Archived)</span>}
+          </span>
           ),
           Actions: (
             <div className="flex gap-2">
@@ -273,9 +290,10 @@ const OrganizationSearch = () => {
                     variant="light"
                     size="sm"
                     onClick={() => handleRemoveTeam(team)}
-                    startContent={<FaRegTrashAlt />}
+                    startContent={team.is_deleted === 1 ? <FaUndo /> : <FaRegTrashAlt />}
+                    color={team.is_deleted === 1 ? "success" : "danger"}
                   >
-                    Delete
+                    {team.is_deleted === 1 ? 'Restore' : 'Delete'}
                   </Button>
                 </>
               )}
@@ -310,7 +328,13 @@ const OrganizationSearch = () => {
                 size="sm"
               />
             ) : (
-              task.name
+              <span 
+                className={task.status ? "line-through text-gray-400" : ""}
+                style={task.status ? { textDecoration: 'line-through' } : {}}
+              >
+                {task.name}
+                {task.status && <span className="ml-2 text-xs text-red-500">(Archived)</span>}
+              </span>
             ),
             deadline: isEditing ? (
               <Input
@@ -375,9 +399,10 @@ const OrganizationSearch = () => {
                       variant="light"
                       size="sm"
                       onClick={() => handleDeleteTask(task)}
-                      startContent={<FaRegTrashAlt />}
+                      startContent={task.status === 1 ? <FaUndo /> : <FaRegTrashAlt />}
+                      color={task.status === 1 ? "success" : "danger"}
                     >
-                      Delete
+                      {task.status === 1 ? 'Restore' : 'Delete'}
                     </Button>
                   </>
                 )}
@@ -454,27 +479,39 @@ const OrganizationSearch = () => {
     };
   
 
-
-  const handleEditProject = (project: any) => {
-    console.log(`Editing project: ${project.name}`);
-  };
-
   const handleDeleteProject = (project: any) => {
-    console.log(`Deleting project: ${project.name}`);
+    requirePasswordVerification(async () => {
+      try {
+        const result = await toggleStatus('project', project.project_id, project.organization_id);
+        handleSearch();
+      } catch (error) {
+        console.error('Failed to toggle project status:', error);
+      }
+    }, 'Restore or Delete Project')
   };
 
-  const handleEditTeam = (team: any) => {
-    console.log(`Removing team: ${team.name}`);
-  };
   const handleRemoveTeam = (team: any) => {
     console.log(`Removing team: ${team.name}`);
+    requirePasswordVerification(async () => {
+      try {
+        const result = await toggleStatus('team', team.team_id, team.organization_id);
+        handleSearch();
+      } catch (error) {
+        console.error('Failed to toggle project status:', error);
+      }
+    }, 'Restore or Delete Team')
   };
 
-  const handleEditTask = (task: any) => {
-    console.log(`Deleting task: ${task.name}`);
-  };
   const handleDeleteTask = (task: any) => {
     console.log(`Deleting task: ${task.name}`);
+    requirePasswordVerification(async () => {
+      try {
+        const result = await toggleStatus('task', task.task_id, task.organization_id);
+        handleSearch();
+      } catch (error) {
+        console.error('Failed to toggle project status:', error);
+      }
+    }, 'Restore or Delete Project')
   };
 
 

@@ -12,7 +12,7 @@ import { languages } from "@/common/select-data/language";
 import { Country } from "@/common/select-data/countries";
 import { timezones } from "@/common/select-data/timezone";
 import { IoPersonRemove } from "react-icons/io5";
-import { FaCheckSquare, FaEdit, FaRegTrashAlt, FaTimes, FaUndo } from "react-icons/fa";
+import { FaCheckSquare, FaEdit, FaRegTrashAlt, FaTimes, FaTrash, FaUndo } from "react-icons/fa";
 import { PasswordVerifyModal } from "./verifyPassword";
 import { 
   searchOrg, 
@@ -238,8 +238,10 @@ const OrganizationSearch = () => {
             style={team.is_deleted ? { textDecoration: 'line-through' } : {}}
           >
             {team.name}
-            {team.is_deleted && <span className="ml-2 text-xs text-red-500">(Archived)</span>}
-          </span>
+            {team.is_deleted === true && (
+              <span className="ml-2 text-xs text-red-500">(Archived)</span>
+            )}          
+            </span>
           ),
           Actions: (
             <div className="flex gap-2">
@@ -333,7 +335,9 @@ const OrganizationSearch = () => {
                 style={task.status ? { textDecoration: 'line-through' } : {}}
               >
                 {task.name}
-                {task.status && <span className="ml-2 text-xs text-red-500">(Archived)</span>}
+                {task.status === true && (
+                  <span className="ml-2 text-xs text-red-500">(Archived)</span>
+                )}          
               </span>
             ),
             deadline: isEditing ? (
@@ -563,7 +567,7 @@ const OrganizationSearch = () => {
             <TableHeader columns={allColumns}>
               {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
             </TableHeader>
-            <TableBody items={paginated}>
+            <TableBody items={paginated} emptyContent={"No data to display."}>
               {(item: any) => (
                 <TableRow key={item.key}>
                   {(columnKey) => (
@@ -733,6 +737,13 @@ const OrganizationSearch = () => {
           {renderTable("Projects", projectColumns, makeProjectRows(), "projects")}
           {renderTable("Teams", teamColumns, makeTeamRows(), "teams")}
           {renderTable("Tasks", taskColumns, makeTaskRows(), "tasks")}
+
+          <Button
+          color="danger"
+          startContent={<FaTrash />}
+          >
+            Disable {organization.name}
+          </Button>
       </div>
       )}
     </div>

@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Button } from "@heroui/button";
 import { Form } from "@heroui/form";
 import { Input } from "@heroui/input";
-import { searchUser, editUser, removeUserFromOrg} from "@/app/api/user-service";
+import { searchUser, editUser, removeUserFromOrg, toggleDisableUser} from "@/app/api/user-service";
 import { format } from "date-fns";
 import { Table, TableHeader, TableBody, TableRow, TableColumn, TableCell } from "@heroui/table";
 import { Divider } from "@heroui/divider";
@@ -19,6 +19,7 @@ interface Member {
   organizations: { name: string; user_has_org_id: number; orgID: number, is_active: any;
    }[];
   created: string;
+  is_active: any;
 }
 
 const EditMember: React.FC = () => {
@@ -28,6 +29,7 @@ const EditMember: React.FC = () => {
     email: "",
     organizations: [],
     created: "",
+    is_active: null,
   });
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -53,15 +55,15 @@ const EditMember: React.FC = () => {
             is_active: userOrg.is_active
           })),
           created: user.created_at || "",
-
+          is_active: user.is_active,
         });
       } else {
         setError("User not found.");
-        setMember({ id: null, name: "", email: "", organizations: [], created: "" });
+        setMember({ id: null, name: "", email: "", organizations: [], created: "", is_active: null });
       }
     } catch (err: any) {
       setError(err.message || "Failed to search user.");
-      setMember({ id: null, name: "", email: "", organizations: [], created: "" });
+      setMember({ id: null, name: "", email: "", organizations: [], created: "", is_active: null });
     } finally {
       setLoading(false);
     }
@@ -74,7 +76,7 @@ const EditMember: React.FC = () => {
 
   const handleClear = () => {
     setQuery("");
-    setMember({ id: null, name: "", email: "", organizations: [], created: "" });
+    setMember({ id: null, name: "", email: "", organizations: [], created: "", is_active: null });
     setError("");
   };
 
@@ -116,6 +118,7 @@ const EditMember: React.FC = () => {
         try {
           setLoading(true);
           await editUser(user);
+          handleSearch();
         } catch (error) {
           console.error("Edit failed:", error);
         } finally {
@@ -123,7 +126,19 @@ const EditMember: React.FC = () => {
         }
       }, `Edit ${user.name}'s information`)
       
-  
+    
+      const handleToggleUserStatus = (user_id: any) =>
+        requirePasswordVerification(async () => {
+          try {
+            setLoading(true);
+            await toggleDisableUser(user_id);
+            handleSearch();
+          } catch (error) {
+            console.error("Edit failed:", error);
+          } finally {
+            setLoading(false);
+          }
+        }, `Disable or Enable Users`)
 
 
   const rows = member.organizations.map((org) => ({
@@ -140,6 +155,8 @@ const EditMember: React.FC = () => {
         color={org.is_active === 1 ? "danger" : "success"}
         variant="light"
         size="sm"
+        isDisabled={member.is_active === 0}  
+
         onClick={() => handleRemove(org)}
       >
         <IoPersonRemove size={20} />
@@ -179,8 +196,9 @@ const EditMember: React.FC = () => {
         {(member.name || member.email || member.organizations.length > 0) && (
           <Card className="my-4 p-4">
             <span className="text-lg text-center">
-              User Information
+            {member.is_active === 0? `${member.name}'s Account is Disabled` : `${member.name} User Information`}  
               </span>
+              
             <Form className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
               <Input
                 label="ID"
@@ -202,6 +220,8 @@ const EditMember: React.FC = () => {
                 placeholder="Created At"
                 required
                 disabled
+                isDisabled={member.is_active === 0}  
+
               />
                   <Input
                     label="Name"
@@ -211,6 +231,8 @@ const EditMember: React.FC = () => {
                     onChange={handleChange}
                     placeholder="Enter user name"
                     required
+                    isDisabled={member.is_active === 0}  
+
                   />
     
               <Input
@@ -222,17 +244,21 @@ const EditMember: React.FC = () => {
                 onChange={handleChange}
                 placeholder="Enter user email"
                 required
-              />
+                isDisabled={member.is_active === 0}  
+                />
               <Button
               variant="solid"
-              color="danger">
-                Remove User
+              color={member.is_active === 1 ? "danger" : "success"}
+              onClick={() =>handleToggleUserStatus(member.id)}>
+                {member.is_active === 1 ? "Disable User" : "Re-active User"}
               </Button>
               <Button
                 variant="solid"
                 color="secondary"
                 onClick={() => handleEdit(member) }
-                disabled={loading}>
+                disabled={loading}
+                isDisabled={member.is_active === 0}  
+                >
                   Save Changes
               </Button>
               <Divider className="col-span-2 my-4" />

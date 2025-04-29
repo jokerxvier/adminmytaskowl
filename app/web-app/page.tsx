@@ -46,7 +46,7 @@ export default function WebApp() {
     {
       title: 'Client Management',
       description: 'Manage clients, contacts, and communication logs.',
-      className: 'md:col-span-2 bg-gradient-to-br from-yellow-50 to-yellow-100',
+      className: ' bg-gradient-to-br from-yellow-50 to-yellow-100',
       link: '/web-app/clients',
     },
     {
@@ -58,7 +58,7 @@ export default function WebApp() {
     {
       title: 'Billing',
       description: 'Manage billings of organization, including payment methods, subscription plans, and invoicing options.',
-      className: 'bg-gradient-to-br from-pink-50 to-pink-100',
+      className: 'md:col-span-2 bg-gradient-to-br from-pink-50 to-pink-100',
       link: '/web-app/billing',
     },
     {

@@ -65,6 +65,43 @@ export async function removeUserFromOrg(org:any){
     },
     body: JSON.stringify(org),
   }); 
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData?.message || "Failed to remove user.");
+  }
+
+  return await res.json();
+}
+
+export async function toggleDisableUser(userID:number){
+
+  const token = getTokenFromCookies();
+
+  if (!token) {
+    throw new Error("Unauthorized: No access token found.");
+  } 
+
+  const res = await fetch(`${GlobalSettings.BASE_URL}super-admin/toggleDisableUser`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      user_id: userID,
+    }),
+  }); 
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData?.message || "Failed to disable user.");
+  }
+
+  return await res.json();
+
+
 }
 
 

@@ -17,16 +17,9 @@ export default async function Home() {
   // Check if cookiesData exists
   if (cookiesData) {
     const token = cookiesData.get("access_token")?.value;
-
     if (!token) {
-      console.log("No token found");
       return redirect("/login");
-    } else {
-      console.log("Token found: " + token);
-      
-    }
-  } else {
-    console.log("Cookies not found");
+    } 
   }
 
   return (

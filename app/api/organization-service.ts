@@ -189,6 +189,31 @@ export async function updateTeam(team:any) {
   return await res.json();
 }
 
+export async function toggleDisableOrg(orgID: number) {
+  const token = getTokenFromCookies();
+
+  if (!token) {
+    throw new Error("Unauthorized: No access token found.");
+  }
+
+  const res = await fetch(`${GlobalSettings.BASE_URL}super-admin/toggleDisableOrgAdmin`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      "Accept": "application/json",
+    },
+    body: JSON.stringify({ organization_id: orgID }),
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData?.message || "Failed to fetch org.");
+  }
+
+  return await res.json();
+}
+
 
 export async function toggleStatus(
   model: 'organization' | 'project' | 'team' | 'task',

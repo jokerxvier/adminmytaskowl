@@ -10,6 +10,7 @@ import { Divider } from "@heroui/divider";
 import { IoPersonRemove } from "react-icons/io5";
 import { Card } from "@heroui/card";
 import { PasswordVerifyModal } from "./verifyPassword";
+import { addToast } from "@heroui/toast";
 
 
 interface Member {
@@ -93,7 +94,12 @@ const EditMember: React.FC = () => {
         setLoading(true);
         await removeUserFromOrg(org);
         await handleSearch();
-  
+        addToast({
+          title: "Removed/Restored from organization",
+          timeout: 3000,
+          shouldShowTimeoutProgress: true,
+          color: 'success',
+        });
       } catch (error) {
         console.error("Edit failed:", error);
       } finally {
@@ -119,6 +125,12 @@ const EditMember: React.FC = () => {
           setLoading(true);
           await editUser(user);
           handleSearch();
+          addToast({
+            title: `${user.name} information edited`,
+            timeout: 3000,
+            shouldShowTimeoutProgress: true,
+            color: 'success',
+          });
         } catch (error) {
           console.error("Edit failed:", error);
         } finally {
@@ -133,6 +145,12 @@ const EditMember: React.FC = () => {
             setLoading(true);
             await toggleDisableUser(user_id);
             handleSearch();
+            addToast({
+              title: `User Disabled/Re-enabled`,
+              timeout: 3000,
+              shouldShowTimeoutProgress: true,
+              color: 'danger',
+            });
           } catch (error) {
             console.error("Edit failed:", error);
           } finally {

@@ -14,6 +14,7 @@ import { timezones } from "@/common/select-data/timezone";
 import { IoPersonRemove } from "react-icons/io5";
 import { FaCheckSquare, FaEdit, FaRegTrashAlt, FaTimes, FaTrash, FaUndo } from "react-icons/fa";
 import { PasswordVerifyModal } from "./verifyPassword";
+
 import { 
   searchOrg, 
   updateOrgAdmin, 
@@ -22,7 +23,9 @@ import {
   updateTask, 
   updateProject, 
   updateTeam, 
-  toggleStatus } from "@/app/api/organization-service";
+  toggleStatus, 
+  toggleDisableOrg} from "@/app/api/organization-service";
+import { addToast } from "@heroui/toast";
 
 
 
@@ -136,6 +139,7 @@ const OrganizationSearch = () => {
           project_id: p.project_id,
           title: isEditing ? (
             <Input
+              isDisabled={organization.is_active === 0}
               value={editingProject.name}
               onChange={(e) =>
                 setEditingProject({ ...editingProject, name: e.target.value })
@@ -154,15 +158,23 @@ const OrganizationSearch = () => {
               {isEditing ? (
                 <>
                   <Button
+                    isDisabled={organization.is_active === 0}
                     variant="light"
                     size="sm"
                     onClick={() => {
+                      
                       requirePasswordVerification(async () => {
                         updateProject({
                           ...p,
                           name: editingProject.name,
                         });
                         handleSearch();
+                        addToast({
+                          title: "Project Edited",
+                          timeout: 3000,
+                          shouldShowTimeoutProgress: true,
+                          color: 'success',
+                        });
                         setEditingProject(null);
                       }, `Edit ${p.name}`)
                     }}
@@ -182,6 +194,8 @@ const OrganizationSearch = () => {
               ) : (
                 <>
                   <Button
+                    isDisabled={organization.is_active === 0}
+
                     variant="light"
                     size="sm"
                     onClick={() =>
@@ -196,6 +210,8 @@ const OrganizationSearch = () => {
                     Edit
                   </Button>
                   <Button
+                    isDisabled={organization.is_active === 0}
+
                     variant="light"
                     size="sm"
                     onClick={() => handleDeleteProject(p)}
@@ -226,6 +242,7 @@ const OrganizationSearch = () => {
           team_id: team.team_id,
           name: isEditing ? (
             <Input
+            isDisabled={organization.is_active === 0}
               value={editingTeam.name}
               onChange={(e) =>
                 setEditingTeam({ ...editingTeam, name: e.target.value })
@@ -248,6 +265,7 @@ const OrganizationSearch = () => {
               {isEditing ? (
                 <>
                   <Button
+                    isDisabled={organization.is_active === 0}
                     variant="light"
                     size="sm"
                     onClick={() => {
@@ -258,6 +276,12 @@ const OrganizationSearch = () => {
                         });
                         handleSearch();
                         setEditingTeam(null);
+                        addToast({
+                          title: "Team Edited",
+                          timeout: 3000,
+                          shouldShowTimeoutProgress: true,
+                          color: 'success',
+                        });
                       },`Edit ${team.name}`)
                     }}
                     startContent={<FaCheckSquare />}
@@ -265,6 +289,7 @@ const OrganizationSearch = () => {
                     Save
                   </Button>
                   <Button
+                  isDisabled={organization.is_active === 0}
                     variant="light"
                     size="sm"
                     onClick={() => setEditingTeam(null)}
@@ -276,6 +301,7 @@ const OrganizationSearch = () => {
               ) : (
                 <>
                   <Button
+                  isDisabled={organization.is_active === 0}
                     variant="light"
                     size="sm"
                     onClick={() =>
@@ -289,9 +315,21 @@ const OrganizationSearch = () => {
                     Edit
                   </Button>
                   <Button
+                  isDisabled={organization.is_active === 0}
                     variant="light"
                     size="sm"
-                    onClick={() => handleRemoveTeam(team)}
+                    onClick={() => 
+                      requirePasswordVerification(async () => {
+                        handleRemoveTeam(team);
+                        handleSearch();
+                        addToast({
+                          title: "Team Disabled",
+                          timeout: 3000,
+                          shouldShowTimeoutProgress: true,
+                          color: 'success',
+                        });
+                      },
+                    `Disable or Re-enable ${team.name}`)}
                     startContent={team.is_deleted === 1 ? <FaUndo /> : <FaRegTrashAlt />}
                     color={team.is_deleted === 1 ? "success" : "danger"}
                   >
@@ -322,6 +360,7 @@ const OrganizationSearch = () => {
             task_id: task.task_id,
             name: isEditing ? (
               <Input
+              isDisabled={organization.is_active === 0}
                 value={editingTask.name}
                 onChange={(e) => setEditingTask({
                   ...editingTask,
@@ -342,6 +381,7 @@ const OrganizationSearch = () => {
             ),
             deadline: isEditing ? (
               <Input
+              isDisabled={organization.is_active === 0}
                 type="date"
                 value={editingTask.deadline}
                 onChange={(e) => setEditingTask({
@@ -358,6 +398,7 @@ const OrganizationSearch = () => {
                 {isEditing ? (
                   <>
                     <Button
+                    isDisabled={organization.is_active === 0}
                       variant="light"
                       size="sm"
                       onClick={() => {
@@ -368,6 +409,12 @@ const OrganizationSearch = () => {
                             deadline: editingTask.deadline
                           });
                           handleSearch()
+                          addToast({
+                            title: "Task Edited",
+                            timeout: 3000,
+                            shouldShowTimeoutProgress: true,
+                            color: 'success',
+                          });
                           setEditingTask(null);
                         }, `Edit ${task.name}`)
                        
@@ -377,6 +424,7 @@ const OrganizationSearch = () => {
                       Save
                     </Button>
                     <Button
+                    isDisabled={organization.is_active === 0}
                       variant="light"
                       size="sm"
                       onClick={() => setEditingTask(null)}
@@ -388,6 +436,7 @@ const OrganizationSearch = () => {
                 ) : (
                   <>
                     <Button
+                    isDisabled={organization.is_active === 0}
                       variant="light"
                       size="sm"
                       onClick={() => setEditingTask({
@@ -400,6 +449,7 @@ const OrganizationSearch = () => {
                       Edit
                     </Button>
                     <Button
+                    isDisabled={organization.is_active === 0}
                       variant="light"
                       size="sm"
                       onClick={() => handleDeleteTask(task)}
@@ -479,6 +529,13 @@ const OrganizationSearch = () => {
             user.email === email ? { ...user, role: newRole } : user
           )
         }));
+        handleSearch();
+        addToast({
+          title: `${email}'s role changed`,
+          timeout: 3000,
+          shouldShowTimeoutProgress: true,
+          color: 'success',
+        });
       }, `change ${email}'s role to ${newRole}`);
     };
   
@@ -488,6 +545,12 @@ const OrganizationSearch = () => {
       try {
         const result = await toggleStatus('project', project.project_id, project.organization_id);
         handleSearch();
+        addToast({
+          title: "Project Disabled",
+          timeout: 3000,
+          shouldShowTimeoutProgress: true,
+          color: 'success',
+        });
       } catch (error) {
         console.error('Failed to toggle project status:', error);
       }
@@ -500,6 +563,12 @@ const OrganizationSearch = () => {
       try {
         const result = await toggleStatus('team', team.team_id, team.organization_id);
         handleSearch();
+        addToast({
+          title: "Team Disabled",
+          timeout: 3000,
+          shouldShowTimeoutProgress: true,
+          color: 'success',
+        });
       } catch (error) {
         console.error('Failed to toggle project status:', error);
       }
@@ -512,6 +581,12 @@ const OrganizationSearch = () => {
       try {
         const result = await toggleStatus('task', task.task_id, task.organization_id);
         handleSearch();
+        addToast({
+          title: "Task Disabled",
+          timeout: 3000,
+          shouldShowTimeoutProgress: true,
+          color: 'success',
+        });
       } catch (error) {
         console.error('Failed to toggle project status:', error);
       }
@@ -586,11 +661,12 @@ const OrganizationSearch = () => {
 
   const renderOrgDetails = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <Input value={editableOrg?.organization_id} label="Organization ID" readOnly />
-      <Input value={editableOrg?.name || ""} onChange={(e) => handleInputChange("name", e.target.value)} label="Name" />
-      <Input value={editableOrg?.organization_address || ""} onChange={(e) => handleInputChange("organization_address", e.target.value)} label="Address" />
-      <Input value={editableOrg?.email || ""} onChange={(e) => handleInputChange("email", e.target.value)} label="Email" />
+      <Input isDisabled={organization.is_active === 0} value={editableOrg?.organization_id} label="Organization ID" readOnly  />
+      <Input isDisabled={organization.is_active === 0} value={editableOrg?.name || ""} onChange={(e) => handleInputChange("name", e.target.value)} label="Name" />
+      <Input isDisabled={organization.is_active === 0} value={editableOrg?.organization_address || ""} onChange={(e) => handleInputChange("organization_address", e.target.value)} label="Address" />
+      <Input isDisabled={organization.is_active === 0} value={editableOrg?.email || ""} onChange={(e) => handleInputChange("email", e.target.value)} label="Email" />
       <Select
+        isDisabled={organization.is_active === 0} 
         label="Industry"
         selectedKeys={editableOrg?.industry ? [editableOrg.industry] : []}
         onSelectionChange={(keys) => {
@@ -612,9 +688,10 @@ const OrganizationSearch = () => {
         ))}
       </Select>
 
-      <Input value={editableOrg?.phone || ""} onChange={(e) => handleInputChange("phone", e.target.value)} label="Phone" />
-      <Input value={editableOrg?.website || ""} onChange={(e) => handleInputChange("website", e.target.value)} label="Website" />
+      <Input isDisabled={organization.is_active === 0} value={editableOrg?.phone || ""} onChange={(e) => handleInputChange("phone", e.target.value)} label="Phone" />
+      <Input isDisabled={organization.is_active === 0} value={editableOrg?.website || ""} onChange={(e) => handleInputChange("website", e.target.value)} label="Website" />
       <Select
+        isDisabled={organization.is_active === 0}
         label="Country"
         selectedKeys={editableOrg?.country ? [editableOrg.country] : []}
         onSelectionChange={(keys) => {
@@ -635,11 +712,12 @@ const OrganizationSearch = () => {
           </SelectItem>
         ))}
       </Select>
-      <Input value={editableOrg?.state || ""} onChange={(e) => handleInputChange("state", e.target.value)} label="State" />
-      <Input value={editableOrg?.city || ""} onChange={(e) => handleInputChange("city", e.target.value)} label="City" />
-      <Input value={editableOrg?.zip_code?.toString() || ""} onChange={(e) => handleInputChange("zip_code", e.target.value)} label="Zip Code" />
-      <Input value={editableOrg?.founded || ""} onChange={(e) => handleInputChange("founded", e.target.value)} label="Founded" />
+      <Input isDisabled={organization.is_active === 0} value={editableOrg?.state || ""} onChange={(e) => handleInputChange("state", e.target.value)} label="State" />
+      <Input isDisabled={organization.is_active === 0} value={editableOrg?.city || ""} onChange={(e) => handleInputChange("city", e.target.value)} label="City" />
+      <Input isDisabled={organization.is_active === 0} value={editableOrg?.zip_code?.toString() || ""} onChange={(e) => handleInputChange("zip_code", e.target.value)} label="Zip Code" />
+      <Input isDisabled={organization.is_active === 0}value={editableOrg?.founded || ""} onChange={(e) => handleInputChange("founded", e.target.value)} label="Founded" />
       <Select
+        isDisabled={organization.is_active === 0}
         label="Language"
         selectedKeys={editableOrg?.language ? [languages.find((lang) => lang.lng === editableOrg.language)?.lng_code || ""] : []}
         onSelectionChange={(keys) => {
@@ -661,6 +739,7 @@ const OrganizationSearch = () => {
 
 
       <Select
+      isDisabled={organization.is_active === 0}
       label="Timezone"
       selectedKeys={editableOrg?.timezone ? [editableOrg.timezone] : []}
       onSelectionChange={(keys) => {
@@ -680,8 +759,9 @@ const OrganizationSearch = () => {
         </SelectItem>
       ))}
     </Select>
-      <Input value={editableOrg?.created_at ? format(new Date(editableOrg.created_at), "MMMM dd, yyyy") : ""} label="Created at" readOnly />
+      <Input isDisabled={organization.is_active === 0} value={editableOrg?.created_at ? format(new Date(editableOrg.created_at), "MMMM dd, yyyy") : ""} label="Created at" readOnly />
       <Button
+          isDisabled={organization.is_active === 0}
           variant="solid"
           size="lg"
           color="primary"
@@ -729,6 +809,9 @@ const OrganizationSearch = () => {
       {organization && (
         <div className="space-y-6">
           <h2 className="text-2xl font-semibold">Organization Details</h2>
+          {organization.is_active === 0 && (
+            <h2 className="text-2xl font-semibold text-center text-danger mb-4">Organization Disabled</h2>
+          )}
           {renderOrgDetails()}
 
 
@@ -739,10 +822,22 @@ const OrganizationSearch = () => {
           {renderTable("Tasks", taskColumns, makeTaskRows(), "tasks")}
 
           <Button
-          color="danger"
-          startContent={<FaTrash />}
+            color="danger"
+            startContent={<FaTrash />}
+            onClick={() => {
+              requirePasswordVerification(async () => {
+                await toggleDisableOrg(organization.organization_id);
+                handleSearch();
+                addToast({
+                  title: organization.is_active ? "Organization Disabled" : "Organization Re-enabled",
+                  timeout: 3000,
+                  shouldShowTimeoutProgress: true,
+                  color: organization.is_active ? 'danger' : 'success',
+                });
+              }, `Confirm ${organization.is_active ? 'Disable' : 'Re-enable'} Organization`);
+            }}
           >
-            Disable {organization.name}
+            {organization.is_active ? `Disable ${organization.name}` : `Re-enable ${organization.name}`}
           </Button>
       </div>
       )}

@@ -203,15 +203,53 @@ export default function ScreenshotPage() {
 
       {!selectedOrgID &&
       <div className="space-y-4 grid">
-        {organizations.map((org) => (
-          <div key={org.organization_id} className="row">
-            <div className="flex items-center gap-3 mb-4">
-              <Button className="text-lg font-semibold" 
-              onPress={() => handleSelectOrg(org.organization_id)}
-              >{org.name}</Button>
+        {organizations && query &&
+          <>
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
+                {organizations.length > 0 ? (
+                  <>
+                    Search results for <span className="text-blue-600 dark:text-blue-400">"{query}"</span>
+                    <span className="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">
+                      ({organizations.length} {organizations.length === 1 ? 'result' : 'results'})
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    No results found for <span className="text-blue-600 dark:text-blue-400">"{query}"</span>
+                  </>
+                )}
+              </h2>
+              {organizations.length === 0 && (
+                <p className="mt-2 text-gray-600 dark:text-gray-400">
+                  Try a different search term or check your spelling.
+                </p>
+              )}
+            <Divider className="my-4"/>
+          </>
+        }
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+          {organizations.map((org) => (
+            <div key={org.organization_id} className="row">
+              <div className="flex items-center gap-3 mb-4">
+              <Button
+                className="text-md font-semibold text-left"
+                size="lg"
+                color="secondary"
+                onPress={() => handleSelectOrg(org.organization_id)}
+              >
+                <div className="w-full overflow-hidden">
+                  <div className="truncate">{org.name}</div>
+                  <div className="flex justify-center items-baseline text-sm font-normal">
+                    <span className="truncate pr-2">{org.email}</span>
+                    <span className="text-xs opacity-80">ID: {org.organization_id}</span>
+                  </div>
+                </div>
+              </Button>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+        
       </div>
     }
       <div className="space-y-4">
@@ -220,17 +258,19 @@ export default function ScreenshotPage() {
             {selectedOrgUsers.map((user) => (
                 <div key={`${user.email}-${user.name}`} className="w-full"> 
                 <Card className="p-4 h-full flex flex-col">
-                  <div className="flex flex-row mb-4">
+                  <div className="flex flex-row mb-4 items-center justify-between ">
                     <div className="flex flex-col gap-2">
-                          <p className="font-medium truncate">{user.name}</p>
-                          <p className="text-sm text-gray-500 truncate">{user.email}</p>
-                          <p className="text-sm text-gray-500">{user.role}</p>
+                          <p className="font-lg truncate font-bold">{user.name}</p>
+                          <p className="text-sm  truncate">{user.email}</p>
+                          <p className="text-sm ">{user.role}</p>
                       </div>
-                      <div className="flex flex-col items-center justify-center ml-4">
+                      <div className="flex flex-col gap-2">
                           <p className="text-[12px] text-center mb-4">Total Screenshots</p>
-                          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 border border-blue-300">
+                          <div className="flex items-center justify-center align-center w-10 h-10 rounded-full bg-blue-100 border border-blue-300">
                               <p className="text-xs font-medium text-blue-600">{user.ss_total}</p>
                           </div>
+                          <p className="text-sm text-gray-500">Blurred: <strong className="text-default-500">{user.is_blurred === 1 ? 'On' : 'Off'}</strong></p>
+                          <p className="text-sm text-gray-500">Interval: <strong className="text-default-500">{user.ss_interval} Minutes</strong></p>
                       </div>
                   </div>
                   <Button onPress={() => handleOpenModal(user)}>View Screenshots</Button>

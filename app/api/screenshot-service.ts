@@ -65,6 +65,7 @@ function getTokenFromCookies(): string | null {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
+        'accept': 'application/json'
       },
       body: JSON.stringify({ 
         organization_id: organizationID,
@@ -80,6 +81,34 @@ function getTokenFromCookies(): string | null {
   
     return await res.json();
   }
+
+  export async function toggleDisableScreenshot(screenshot_id: number) {
+    const token = getTokenFromCookies();
+  
+    if (!token) {
+      throw new Error("Unauthorized: No access token found.");
+    }
+  
+    const res = await fetch(`${GlobalSettings.BASE_URL}super-admin/toggleDisableScreenshot`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        'accept': 'application/json'
+      },
+      body: JSON.stringify({screenshot_id: screenshot_id,}),
+    });
+  
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData?.message || "Failed to search user.");
+    }
+  
+    return await res.json();
+  }
+
+
+  
 
 
 

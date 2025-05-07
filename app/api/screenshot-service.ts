@@ -109,7 +109,33 @@ function getTokenFromCookies(): string | null {
 
 
   
-
+  export async function getAvailableDates(userID: number, organizationID: number) {
+    const token = getTokenFromCookies();
+  
+    if (!token) {
+      throw new Error("Unauthorized: No access token found.");
+    }
+  
+    const res = await fetch(`${GlobalSettings.BASE_URL}super-admin/screenshotAvailableDates`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        'accept': 'application/json'
+      },
+      body: JSON.stringify({ 
+        organization_id: organizationID,
+        user_id: userID,
+    }),
+    });
+  
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData?.message || "Failed to search user.");
+    }
+  
+    return await res.json();
+  }
 
 
   

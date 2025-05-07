@@ -1,7 +1,7 @@
 "use client";
-import { getScreenshots, searchScreenshotOrg, selectOrgSS, toggleDisableScreenshot } from "@/app/api/screenshot-service";
+import { getScreenshots, searchScreenshotOrg, selectOrgSS, toggleDisableScreenshot, getAvailableDates } from "@/app/api/screenshot-service";
 import { Button } from "@heroui/button";
-import { Calendar } from "@heroui/calendar";
+import { Calendar, DateValue } from "@heroui/calendar";
 import { Card } from "@heroui/card";
 import { Input } from "@heroui/input";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
@@ -12,6 +12,8 @@ import { Code } from "@heroui/code";
 import { FaExpand, FaImage, FaTrash, FaTrashRestore, } from "react-icons/fa";
 import { Divider } from "@heroui/divider";
 import { PasswordVerifyModal } from "@/components/verifyPassword";
+import { Spinner } from "@heroui/spinner";
+import { addToast } from "@heroui/toast";
 
 export default function ScreenshotPage() {
   const [query, setQuery] = useState("");
@@ -23,6 +25,7 @@ export default function ScreenshotPage() {
   const [selectedUserID, setSelectedUserID] = useState<any>(null);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [userScreenshots, setUserScreenshots] = useState<any[]>([]);
+  const [availableDates, setAvailableDates] = useState<any[]>([]);
   const [date, setDate] = useState<any>(null);
   const {isOpen, onOpen, onClose} = useDisclosure();
   let [calendarValue, setCalendarValue] = useState<any>(null);
@@ -44,6 +47,14 @@ export default function ScreenshotPage() {
     setLoading(true);
     setError(null);
     try {
+      const data = await getAvailableDates(user.id, selectedOrgID);
+    
+      // Extract just the date strings (format: 'YYYY-MM-DD') from the API response
+      const availableDates = data.map((item: any) => item.date); 
+      // or if API returns full dates: data.map((item: any) => item.created_at.split('T')[0]);
+      setAvailableDates(availableDates); // Store available dates for calendar disabling
+
+
       setSelectedUser(user)
       setSelectedUserID(user.id); // Fixed this line
       onOpen(); // Open modal after loading screenshots
@@ -84,7 +95,7 @@ export default function ScreenshotPage() {
             }
           }
           // Handle base64 type
-          else if (screenshot.storage_type === 'base64' && screenshot.screenshot) {
+          else if (screenshot.storage_type === 'base64'|| screenshot.storage_type === 'missing' && screenshot.screenshot) {
             displaySource = `data:image/jpeg;base64,${screenshot.screenshot}`;
             sourceType = 'base64';
           }
@@ -238,9 +249,18 @@ export default function ScreenshotPage() {
         <ModalContent>
           {(onClose) => (
             <>
+            {loading && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
+                <Spinner variant="simple" label={`Loading ${selectedUser.name}'s Screenshots on ${date}`} />
+              </div>
+            )}
               <ModalHeader className="flex flex-col gap-1 text-center">{selectedUser.name}'s Screenshots</ModalHeader>
               <ModalBody className="justify-center">
                 <Calendar
+                  isDateUnavailable={(date: DateValue) => {
+                    return !availableDates.includes(date.toString());
+                  }}
+                    isDisabled={loading}
                     visibleMonths={3}
                     aria-label="Date (Controlled)" 
                     value={calendarValue}
@@ -266,12 +286,13 @@ export default function ScreenshotPage() {
                           </div>
                           <div className="relative aspect-video overflow-hidden rounded-md bg-gray-100">
                           <Image
+
                               src={screenshot.displaySource}
                               alt={`Screenshot ${screenshot.screenshot_id}`}
                               className={`
                                 object-cover w-full h-full
                                 transition-all duration-300
-                                ${screenshot.is_deleted === 1 
+                                ${screenshot.is_deleted === 1 || loading
                                   ? 'filter blur-md opacity-75 cursor-not-allowed' 
                                   : 'cursor-pointer hover:scale-[1.02]'
                                 }
@@ -291,6 +312,13 @@ export default function ScreenshotPage() {
                                 requirePasswordVerification(async () => {
                                   toggleDisableScreenshot(screenshot.screenshot_id)
                                   handleGetScreenshots(date);
+                                  addToast({
+                                    title: "Screenshot Disabled",
+                                    description: `${selectedUser.name}'s screenshot with ID: ${screenshot.screenshot_id} Deleted`,
+                                    timeout: 3000,
+                                    shouldShowTimeoutProgress: true,
+                                    color:"danger"
+                                  });
                                 },'Restore or Delete Screenshot')
                               }}
                               isLoading={loading}
@@ -309,7 +337,13 @@ export default function ScreenshotPage() {
                                 requirePasswordVerification(async () => {
                                   toggleDisableScreenshot(screenshot.screenshot_id);
                                   handleGetScreenshots(date);
-
+                                  addToast({
+                                    title: "Screenshot Restored",
+                                    description: `${selectedUser.name}'s screenshot with ID: ${screenshot.screenshot_id} Restored`,
+                                    timeout: 3000,
+                                    shouldShowTimeoutProgress: true,
+                                    color:"success"
+                                  });
                                 },'Restore or Delete Screenshot')
                               }}
                               isLoading={loading}

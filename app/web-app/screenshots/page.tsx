@@ -178,10 +178,6 @@ export default function ScreenshotPage() {
     setIsVerifyModalOpen(true);
   };
 
-    function parseDate(arg0: string): unknown {
-        throw new Error("Function not implemented.");
-    }
-
   return (
     <div>
       <PasswordVerifyModal

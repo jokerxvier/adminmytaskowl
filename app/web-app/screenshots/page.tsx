@@ -183,7 +183,7 @@ export default function ScreenshotPage() {
     }
 
   return (
-    <>
+    <div>
     <div className="flex flex-col w-full h-full">
       <h1 className="text-2xl font-bold">Screenshots</h1>
       <div className="flex flex-row gap-4 items-center mb-4">
@@ -452,6 +452,6 @@ export default function ScreenshotPage() {
               title="Confirm Action"
               description={pendingAction?.description || ""}
             />
-    </>
+    </div>
   );
 }

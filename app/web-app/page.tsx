@@ -95,13 +95,21 @@ export default function WebApp() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 auto-rows-[200px]">
         {features.map((feature, index) => (
           <div
-            key={index}
-            className={`p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 ${feature.className}`}
-            onClick={() => window.location.href = feature.link} // Redirect to the link
-          >
-            <h3 className="text-gray-700 text-xl font-semibold mb-2">{feature.title}</h3>
-            <p className="text-gray-700">{feature.description}</p>
-          </div>
+          key={index}
+          role="button"
+          tabIndex={0}
+          onClick={() => window.location.href = feature.link}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              window.location.href = feature.link;
+            }
+          }}
+          className={`p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 ${feature.className}`}
+        >
+          <h3 className="text-gray-700 text-xl font-semibold mb-2">{feature.title}</h3>
+          <p className="text-gray-700">{feature.description}</p>
+        </div>
+        
         ))}
       </div>
     </div>

@@ -98,16 +98,17 @@ export default function AttendancePage() {
       {results.length > 0 && (
         <ul className="">
           {results.map((org) => (
-            <li
-              key={org.organization_id}
-              className="px-4 py-2 cursor-pointer border rounded-md shadow mt-4"
+            <li key={org.organization_id} className="mt-4">
+            <button
+              className="w-full text-left px-4 py-2 cursor-pointer border rounded-md shadow"
               onClick={() => {
                 setOpen(true);
                 setSelectedOrg(org);
               }}
             >
               <strong>ID:</strong> {org.organization_id}, <strong>Name:</strong> {org.name}
-            </li>
+            </button>
+          </li>
           ))}
         </ul>
       )}

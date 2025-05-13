@@ -201,14 +201,14 @@ export default function ScreenshotPage() {
 
       {error && <p className="text-red-500 mb-4">{error}</p>}
 
-      {!selectedOrgID &&
+      {!selectedOrgID && 
       <div className="space-y-4 grid">
         {organizations && query &&
           <>
               <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
                 {organizations.length > 0 ? (
                   <>
-                    Search results for <span className="text-blue-600 dark:text-blue-400">"{query}"</span>
+                    <span className="text-blue-600 dark:text-blue-400">Search results for {query}</span>
                     <span className="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">
                       ({organizations.length} {organizations.length === 1 ? 'result' : 'results'})
                     </span>
@@ -291,7 +291,7 @@ export default function ScreenshotPage() {
             <>
             {loading && (
               <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
-                <Spinner variant="simple" label={`Loading ${selectedUser.name}'s Screenshots on ${date}`} />
+                <Spinner variant="simple" label={`Loading Screenshots of ${selectedUser.name} on ${date}`} />
               </div>
             )}
               <ModalHeader className="flex flex-col gap-1 text-center">{selectedUser.name}'s Screenshots</ModalHeader>

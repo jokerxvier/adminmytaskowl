@@ -74,7 +74,6 @@ import { useState } from "react";
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-                  autoFocus
                 />
               </ModalBody>
               <ModalFooter>

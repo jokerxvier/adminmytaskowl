@@ -184,6 +184,17 @@ export default function ScreenshotPage() {
 
   return (
     <div>
+      <PasswordVerifyModal
+        isOpen={isVerifyModalOpen}
+        onOpenChange={setIsVerifyModalOpen}
+        onVerified={() => {
+          if (pendingAction) {
+            pendingAction.action();
+          }
+        }}
+        title="Confirm Action"
+        description={pendingAction?.description || ""}
+      />
       <div className="flex flex-col w-full h-full">
         <h1 className="text-2xl font-bold">Screenshots</h1>
         <div className="flex flex-row gap-4 items-center mb-4">
@@ -441,17 +452,7 @@ export default function ScreenshotPage() {
           </ModalFooter>
         </ModalContent>
       </Modal>
-      <PasswordVerifyModal
-              isOpen={isVerifyModalOpen}
-              onOpenChange={setIsVerifyModalOpen}
-              onVerified={() => {
-                if (pendingAction) {
-                  pendingAction.action();
-                }
-              }}
-              title="Confirm Action"
-              description={pendingAction?.description || ""}
-      />
+
     </div>
   );
 }

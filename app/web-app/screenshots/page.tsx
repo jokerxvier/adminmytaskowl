@@ -288,7 +288,7 @@ export default function ScreenshotPage() {
     <Modal isOpen={isOpen} size='5xl' onClose={onClose} backdrop="blur" scrollBehavior="outside">
         <ModalContent>
           {(onClose) => (
-            <>
+            <div>
             {loading && (
               <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
                 <Spinner variant="simple" label={`Loading Screenshots of ${selectedUser.name} on ${date}`} />
@@ -409,7 +409,7 @@ export default function ScreenshotPage() {
                   )}
                 </div>
               </ModalBody>
-            </>
+            </div>
           )}
         </ModalContent>
       </Modal>

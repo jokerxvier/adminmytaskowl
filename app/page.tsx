@@ -8,7 +8,6 @@ import { Card } from "@heroui/card";
 import Link from "next/link";
 
 import HetznerMetrics from "@/components/hetzner-metrics";
-import PingComponent from "@/components/pinger";
 import SuperAdminDashboard from "@/components/DashboardCount";
 
 export default async function Home() {
@@ -58,11 +57,6 @@ export default async function Home() {
       <section>
         <Card>
           <HetznerMetrics />
-        </Card>
-      </section>
-      <section>
-        <Card className="p-4">
-          <PingComponent />
         </Card>
       </section>
       <section>

@@ -1,16 +1,22 @@
-'use client'
+"use client";
 import { Chip } from "@heroui/chip";
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@heroui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableColumn,
+  TableHeader,
+  TableRow,
+} from "@heroui/table";
 import { Tooltip } from "@heroui/tooltip";
 import { User } from "@heroui/user";
 import React from "react";
 
-
 export const columns = [
-  {name: "NAME", uid: "name"},
-  {name: "ROLE", uid: "role"},
-  {name: "STATUS", uid: "status"},
-  {name: "ACTIONS", uid: "actions"},
+  { name: "NAME", uid: "name" },
+  { name: "ROLE", uid: "role" },
+  { name: "STATUS", uid: "status" },
+  { name: "ACTIONS", uid: "actions" },
 ];
 
 export const users = [
@@ -66,7 +72,7 @@ export const users = [
   },
 ];
 
-export const EyeIcon = (props:any) => {
+export const EyeIcon = (props: any) => {
   return (
     <svg
       aria-hidden="true"
@@ -96,7 +102,7 @@ export const EyeIcon = (props:any) => {
   );
 };
 
-export const DeleteIcon = (props:any) => {
+export const DeleteIcon = (props: any) => {
   return (
     <svg
       aria-hidden="true"
@@ -147,7 +153,7 @@ export const DeleteIcon = (props:any) => {
   );
 };
 
-export const EditIcon = (props:any) => {
+export const EditIcon = (props: any) => {
   return (
     <svg
       aria-hidden="true"
@@ -201,7 +207,7 @@ export default function UsersTable() {
       case "name":
         return (
           <User
-            avatarProps={{radius: "lg", src: user.avatar}}
+            avatarProps={{ radius: "lg", src: user.avatar }}
             description={user.email}
             name={cellValue}
           >
@@ -212,7 +218,9 @@ export default function UsersTable() {
         return (
           <div className="flex flex-col">
             <p className="text-bold text-sm capitalize">{cellValue}</p>
-            <p className="text-bold text-sm capitalize text-default-400">{user.team}</p>
+            <p className="text-bold text-sm capitalize text-default-400">
+              {user.team}
+            </p>
           </div>
         );
       case "status":
@@ -250,7 +258,10 @@ export default function UsersTable() {
     <Table aria-label="Example table with custom cells">
       <TableHeader columns={columns}>
         {(column) => (
-          <TableColumn key={column.uid} align={column.uid === "actions" ? "center" : "start"}>
+          <TableColumn
+            key={column.uid}
+            align={column.uid === "actions" ? "center" : "start"}
+          >
             {column.name}
           </TableColumn>
         )}
@@ -258,11 +269,12 @@ export default function UsersTable() {
       <TableBody items={users}>
         {(item) => (
           <TableRow key={item.id}>
-            {(columnKey: any) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
+            {(columnKey: any) => (
+              <TableCell>{renderCell(item, columnKey)}</TableCell>
+            )}
           </TableRow>
         )}
       </TableBody>
     </Table>
   );
 }
-

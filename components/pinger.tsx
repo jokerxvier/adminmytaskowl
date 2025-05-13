@@ -1,9 +1,8 @@
-'use client'
-import { cookies } from 'next/dist/server/request/cookies';
-import { useState, useEffect } from 'react';
+"use client";
+import { useState, useEffect } from "react";
 
 const Pinger = () => {
-  const [wsStatus, setWsStatus] = useState<string>('Checking WebSocket...');
+  const [wsStatus, setWsStatus] = useState<string>("Checking WebSocket...");
 
   useEffect(() => {
     pingWebSocket();
@@ -11,12 +10,17 @@ const Pinger = () => {
 
   const pingWebSocket = async () => {
     try {
-      const response = await fetch('/api/websocket-ping');
+      const response = await fetch("/api/websocket-ping");
       const data = await response.json();
+
       // If the WebSocket responds with status "ok", mark it as reachable
-      setWsStatus(data.status === 'ok' ? 'WebSocket is reachable' : 'WebSocket is not reachable');
+      setWsStatus(
+        data.status === "ok"
+          ? "WebSocket is reachable"
+          : "WebSocket is not reachable",
+      );
     } catch (error) {
-      setWsStatus('Error pinging WebSocket');
+      setWsStatus("Error pinging WebSocket");
     }
   };
 

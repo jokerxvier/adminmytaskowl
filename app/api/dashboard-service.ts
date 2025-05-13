@@ -3,6 +3,7 @@ import { GlobalSettings } from "@/common/global.enum";
 // Utility to extract token from cookies
 function getTokenFromCookies(): string | null {
   const match = document.cookie.match(/(^|;) ?access_token=([^;]*)(;|$)/);
+
   return match ? match[2] : null;
 }
 
@@ -22,11 +23,13 @@ async function fetchWithAuth(endpoint: string) {
 
   if (!res.ok) {
     const errorData = await res.json();
+
     throw new Error(errorData?.message || "Failed to fetch data.");
   }
 
   const data = await res.json();
-  return data.response; 
+
+  return data.response;
 }
 
 // Service functions
@@ -42,12 +45,12 @@ export async function getTotalScreenshots() {
   return fetchWithAuth("totalScreenshots");
 }
 export async function totalClockInsToday() {
-    return fetchWithAuth("totalClockInsToday");
-  }
-
-export async function totalNewUsersThisMonth(){
-    return fetchWithAuth("totalNewUsersThisMonth");
+  return fetchWithAuth("totalClockInsToday");
 }
-export async function totalNewOrganizationsThisMonth(){
-    return fetchWithAuth("totalNewOrganizationsThisMonth");
+
+export async function totalNewUsersThisMonth() {
+  return fetchWithAuth("totalNewUsersThisMonth");
+}
+export async function totalNewOrganizationsThisMonth() {
+  return fetchWithAuth("totalNewOrganizationsThisMonth");
 }

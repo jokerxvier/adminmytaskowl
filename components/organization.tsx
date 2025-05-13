@@ -1,8 +1,7 @@
-import { Button } from '@heroui/button';
-import { Form } from '@heroui/form';
-import { Input } from '@heroui/input';
-import { Select, SelectItem } from '@heroui/select';
-import React, { useState } from 'react';
+import { Button } from "@heroui/button";
+import { Form } from "@heroui/form";
+import { Input } from "@heroui/input";
+import React, { useState } from "react";
 
 interface Organization {
   name: string;
@@ -10,61 +9,63 @@ interface Organization {
   invitation: string;
 }
 
-
 const EditOrganization: React.FC = () => {
   const [organization, setOrganization] = useState<Organization>({
-    name: '',
-    email: '',
-    invitation: '',
+    name: "",
+    email: "",
+    invitation: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
     const { name, value } = e.target;
+
     setOrganization((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Updated Member:', organization);
+    console.log("Updated Member:", organization);
     // Add logic to save the updated member information
   };
 
   return (
-    <Form onSubmit={handleSubmit} className="max-w-md mx-auto space-y-6">
+    <Form className="max-w-md mx-auto space-y-6" onSubmit={handleSubmit}>
       <Input
-        label="Name"
+        required
         id="name"
+        label="Name"
         name="name"
+        placeholder="Enter organization name"
         value={organization.name}
         onChange={handleChange}
-        required
-        placeholder="Enter organization name"
       />
 
       <Input
-        type="email"
-        label="Email"
+        required
         id="email"
+        label="Email"
         name="email"
+        placeholder="Enter organization email"
+        type="email"
         value={organization.email}
         onChange={handleChange}
-        required
-        placeholder="Enter organization email"
       />
 
       <Input
-        label="Organization"
         id="organization"
+        label="Organization"
         name="organization"
+        placeholder="Enter organization invitation code"
         value={organization.invitation}
         onChange={handleChange}
-        placeholder="Enter organization invitation code"
       />
       <div className="flex flex-cols justify-center items-center space-x-3 pt-4">
-        <Button variant="bordered" type="button" color="secondary">
+        <Button color="secondary" type="button" variant="bordered">
           Clear
         </Button>
-        <Button type="submit" variant="solid" color="secondary">
+        <Button color="secondary" type="submit" variant="solid">
           Search
         </Button>
       </div>

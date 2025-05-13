@@ -1,10 +1,12 @@
 // app/layout.tsx (server component)
 import "@/styles/globals.css";
 import { Metadata, Viewport } from "next";
+
 import { Providers } from "./providers";
+import { ClientLayout } from "./client-layout";
+
 import { siteConfig } from "@/config/site";
 import { fontSans } from "@/config/fonts";
-import { ClientLayout } from "./client-layout";
 
 export const metadata: Metadata = {
   title: {

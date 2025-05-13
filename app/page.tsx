@@ -4,10 +4,11 @@ import { Button } from "@heroui/button";
 import { FaAngular } from "react-icons/fa";
 import { IoLogoElectron } from "react-icons/io5";
 import { SiNestjs } from "react-icons/si";
-import HetznerMetrics from "@/components/hetzner-metrics";
 import { Card } from "@heroui/card";
-import PingComponent from "@/components/pinger";
 import Link from "next/link";
+
+import HetznerMetrics from "@/components/hetzner-metrics";
+import PingComponent from "@/components/pinger";
 import SuperAdminDashboard from "@/components/DashboardCount";
 
 export default async function Home() {
@@ -17,9 +18,10 @@ export default async function Home() {
   // Check if cookiesData exists
   if (cookiesData) {
     const token = cookiesData.get("access_token")?.value;
+
     if (!token) {
       return redirect("/login");
-    } 
+    }
   }
 
   return (
@@ -34,24 +36,24 @@ export default async function Home() {
       </div>
 
       <div className="flex gap-3 flex-wrap justify-center mb-8">
-          <Link href="/web-app">
-            <Button variant="shadow" className="rounded-full px-6 py-2">
-              <FaAngular />
-              Web App
-            </Button>
-          </Link>
-          <Link href="/">
-            <Button variant="shadow" className="rounded-full px-6 py-2">
-                <IoLogoElectron />
-                Software
-            </Button>
-          </Link>
-          <Link href="/websocket">
-            <Button variant="shadow" className="rounded-full px-6 py-2">
-                <SiNestjs />
-                Websockets
-            </Button> 
-          </Link>
+        <Link href="/web-app">
+          <Button className="rounded-full px-6 py-2" variant="shadow">
+            <FaAngular />
+            Web App
+          </Button>
+        </Link>
+        <Link href="/">
+          <Button className="rounded-full px-6 py-2" variant="shadow">
+            <IoLogoElectron />
+            Software
+          </Button>
+        </Link>
+        <Link href="/websocket">
+          <Button className="rounded-full px-6 py-2" variant="shadow">
+            <SiNestjs />
+            Websockets
+          </Button>
+        </Link>
       </div>
       <section>
         <Card>
@@ -67,6 +69,5 @@ export default async function Home() {
         <SuperAdminDashboard />
       </section>
     </section>
-
   );
 }

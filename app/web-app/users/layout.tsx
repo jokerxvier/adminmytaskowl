@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface UsersLayoutProps {
   children: React.ReactNode;
@@ -6,7 +6,7 @@ interface UsersLayoutProps {
 
 const UsersLayout: React.FC<UsersLayoutProps> = ({ children }) => {
   return (
-    <div className='flex flex-col w-full h-full p-8'>
+    <div className="flex flex-col w-full h-full p-8">
       <main>{children}</main>
     </div>
   );

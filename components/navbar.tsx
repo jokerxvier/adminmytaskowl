@@ -4,36 +4,26 @@ import {
   NavbarMenu,
   NavbarMenuToggle,
   NavbarBrand,
-  NavbarItem,
   NavbarMenuItem,
 } from "@heroui/navbar";
-import { Button } from "@heroui/button";
 import { Kbd } from "@heroui/kbd";
 import { Link } from "@heroui/link";
 import { Input } from "@heroui/input";
-import { cn, link as linkStyles } from "@heroui/theme";
 import NextLink from "next/link";
-import clsx from "clsx";
 import { CiLogout } from "react-icons/ci";
-
-import { siteConfig } from "@/config/site";
-import { ThemeSwitch } from "@/components/theme-switch";
 import {
-  TwitterIcon,
-  GithubIcon,
-  DiscordIcon,
-  HeartFilledIcon,
-  SearchIcon,
-  Logo,
-} from "@/components/icons";
-import { User } from "@heroui/user";
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/dropdown";
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+} from "@heroui/dropdown";
 import { Avatar } from "@heroui/avatar";
-import { logout } from "@/app/api/auth-service";
-import { IoHome } from "react-icons/io5";
-import { SiNestjs } from "react-icons/si";
-import { FaAngular } from "react-icons/fa";
 import React from "react";
+
+import { logout } from "@/app/api/auth-service";
+import { GithubIcon, SearchIcon } from "@/components/icons";
+import { ThemeSwitch } from "@/components/theme-switch";
+import { siteConfig } from "@/config/site";
 
 export const Navbar = () => {
   const searchInput = (
@@ -72,14 +62,14 @@ export const Navbar = () => {
         className="hidden sm:flex basis-1/5 sm:basis-full"
         justify="end"
       >
-           <ul className="hidden lg:flex gap-4 justify-start ml-2">
-           {siteConfig.navItems.map((item, index) => (
+        <ul className="hidden lg:flex gap-4 justify-start ml-2">
+          {siteConfig.navItems.map((item, index) => (
             <NavbarMenuItem key={`${item.label}-${index}`}>
               <Link
-                color='primary'
+                className="flex items-center gap-2" // Add some spacing
+                color="primary"
                 href={item.href}
                 size="lg"
-                className="flex items-center gap-2" // Add some spacing
               >
                 {/* Render the icon dynamically */}
                 {/* {item.icon} */}
@@ -97,33 +87,33 @@ export const Navbar = () => {
       </NavbarContent>
 
       <Dropdown>
-      <DropdownTrigger>
-        <div className="flex items-center gap-2">
-          <span className="text-default-500">Admin</span>
-          <Avatar size="md" isBordered src="https://mytaskowl.com/wp-content/uploads/2024/10/taskowl-logo-final-edited-1-300x300.png" />
-        </div>
-      </DropdownTrigger>
-      <DropdownMenu aria-label="Dropdown menu with icons" variant="faded">
-      <DropdownItem
-          key="theme"
-          startContent={<ThemeSwitch />}
+        <DropdownTrigger>
+          <div className="flex items-center gap-2">
+            <span className="text-default-500">Admin</span>
+            <Avatar
+              isBordered
+              size="md"
+              src="https://mytaskowl.com/wp-content/uploads/2024/10/taskowl-logo-final-edited-1-300x300.png"
+            />
+          </div>
+        </DropdownTrigger>
+        <DropdownMenu aria-label="Dropdown menu with icons" variant="faded">
+          <DropdownItem key="theme" startContent={<ThemeSwitch />}>
+            Switch Mode
+          </DropdownItem>
+          <DropdownItem
+            key="new"
+            startContent={<CiLogout />}
+            onClick={() => {
+              logout();
+              // Optional: Redirect to login page after logout
+              window.location.href = "/login";
+            }}
           >
-         Switch Mode
-        </DropdownItem>
-        <DropdownItem
-          key="new"
-          startContent={<CiLogout />}
-          onClick={() => {
-            logout();
-            // Optional: Redirect to login page after logout
-            window.location.href = "/login";
-          }}
-        >
-          Logout
-        </DropdownItem>
-      </DropdownMenu>
-    </Dropdown>
-     
+            Logout
+          </DropdownItem>
+        </DropdownMenu>
+      </Dropdown>
 
       <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
         <Link isExternal aria-label="Github" href={siteConfig.links.github}>

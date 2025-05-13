@@ -204,19 +204,19 @@ export default function ScreenshotPage() {
       {!selectedOrgID && 
       <div className="space-y-4 grid">
         {organizations && query &&
-          <>
+          <div>
               <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
                 {organizations.length > 0 ? (
-                  <>
+                  <div>
                     <span className="text-blue-600 dark:text-blue-400">Search results for {query}</span>
                     <span className="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">
                       ({organizations.length} {organizations.length === 1 ? 'result' : 'results'})
                     </span>
-                  </>
+                  </div>
                 ) : (
-                  <>
+                  <div>
                     No results found for <span className="text-blue-600 dark:text-blue-400">"{query}"</span>
-                  </>
+                  </div>
                 )}
               </h2>
               {organizations.length === 0 && (
@@ -225,7 +225,7 @@ export default function ScreenshotPage() {
                 </p>
               )}
             <Divider className="my-4"/>
-          </>
+          </div>
         }
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
           {organizations.map((org) => (

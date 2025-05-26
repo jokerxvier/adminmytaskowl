@@ -297,3 +297,40 @@ export async function toggleStatus(
     );
   }
 }
+
+export async function addUserToOrg(
+  user_id: any,
+  organization_id: any,
+  role: string,
+) {
+  const token = getTokenFromCookies();
+
+  if (!token) {
+    throw new Error("Unauthorized: No access token found.");
+  }
+
+  const res = await fetch(
+    `${GlobalSettings.BASE_URL}super-admin/addUserToOrgAdmin`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        user_id: user_id,
+        organization_id: organization_id,
+        role: role,
+      }),
+    },
+  );
+
+  if (!res.ok) {
+    const errorData = await res.json();
+
+    throw new Error(errorData?.message || "Failed to search user.");
+  }
+
+  return await res.json();
+}

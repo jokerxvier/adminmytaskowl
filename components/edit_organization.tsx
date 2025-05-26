@@ -916,7 +916,6 @@ const OrganizationSearch = () => {
     <Card className="my-4 p-4">
       <div className="p-6 space-y-6">
         <h1 className="text-3xl font-bold">Search Organizations</h1>
-
         <div className="flex flex-col space-y-4">
           <Input
             placeholder="Search by organization name"

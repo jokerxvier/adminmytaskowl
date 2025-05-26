@@ -18,6 +18,7 @@ import { Card } from "@heroui/card";
 import { addToast } from "@heroui/toast";
 
 import { PasswordVerifyModal } from "./verifyPassword";
+import { AddToOrgModal } from "./addToOrg";
 
 import {
   searchUser,
@@ -46,6 +47,7 @@ const EditMember: React.FC = () => {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const handleSearch = async () => {
     setLoading(true);
@@ -370,6 +372,16 @@ const EditMember: React.FC = () => {
               >
                 Organizations
               </label>
+              <Button
+              className="w-full"
+              color="primary"
+              size="md"
+              variant="solid"
+              onClick={() => setIsAddModalOpen(true)}
+              isDisabled={!selectedMember || selectedMember.is_active === 0}
+              >
+                Add user to an Organization
+              </Button>
               {selectedMember.organizations.length > 0 ? (
                 <Table aria-label="Organizations Table">
                   <TableHeader columns={columns}>
@@ -394,6 +406,22 @@ const EditMember: React.FC = () => {
           </Form>
         </Card>
       )}
+      
+      <AddToOrgModal
+      isOpen={isAddModalOpen}
+      onOpenChange={setIsAddModalOpen}
+      selectedMember={selectedMember}  // Pass the selected member
+      onSuccess={() => {
+        handleSearch(); // Refresh the member data
+        addToast({
+          title: `${selectedMember?.name} added to organization`,
+          timeout: 3000,
+          shouldShowTimeoutProgress: true,
+          color: "success",
+        });
+        setIsAddModalOpen(false); // Close the modal from parent
+        }}
+      />
 
       <PasswordVerifyModal
         description={pendingAction?.description || ""}
@@ -407,6 +435,7 @@ const EditMember: React.FC = () => {
         }}
       />
     </div>
+      
   );
 };
 

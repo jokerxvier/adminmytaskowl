@@ -14,11 +14,6 @@ export const siteConfig = {
       href: "/web-app",
       icon: "FaAngular",
     },
-    {
-      label: "WebSockets",
-      href: "/websocket",
-      icon: "SiNestjs",
-    },
   ],
   navMenuItems: [
     {
@@ -28,10 +23,6 @@ export const siteConfig = {
     {
       label: "Web App",
       href: "/web-app",
-    },
-    {
-      label: "WebSockets",
-      href: "/websocket",
     },
   ],
   links: {

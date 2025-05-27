@@ -19,12 +19,12 @@ import {
 } from "@heroui/dropdown";
 import { Avatar } from "@heroui/avatar";
 import React from "react";
-
+import { Image } from "@heroui/image";
 import { logout } from "@/app/api/auth-service";
 import { GithubIcon, SearchIcon } from "@/components/icons";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { siteConfig } from "@/config/site";
-
+import mytaskowlLogo from "@/assets/images/mytaskowl_logo.svg";
 export const Navbar = () => {
   const searchInput = (
     <Input
@@ -48,11 +48,15 @@ export const Navbar = () => {
   );
 
   return (
-    <HeroUINavbar maxWidth="xl" position="sticky">
+    <HeroUINavbar maxWidth="xl" position="sticky" className="border-b border-gray-200">
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
-        <NavbarBrand as="li" className="gap-3 max-w-fit">
+        <NavbarBrand as="li" className="m-4 gap-3 max-w-fit">
           <NextLink className="flex justify-start items-center gap-1" href="/">
-            {/* <Logo /> */}
+            <Image
+              src="/assets/images/mytaskowl_logo.png"
+              alt="MyTaskOwl Logo"
+              width={100}
+            />
             <p className="font-bold text-inherit">MyTaskOwl Admin</p>
           </NextLink>
         </NavbarBrand>

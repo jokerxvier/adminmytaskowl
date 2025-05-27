@@ -1,4 +1,5 @@
 "use client";
+import { Breadcrumbs, BreadcrumbItem } from "@heroui/breadcrumbs";
 import { useState, useEffect } from "react";
 
 export default function WebApp() {
@@ -92,6 +93,10 @@ export default function WebApp() {
 
   return (
     <div className={`p-6 max-w-7xl mx-auto ${isModalOpen ? "blur-sm" : ""}`}>
+      <Breadcrumbs className="mb-4" radius="full" variant="solid">
+        <BreadcrumbItem href="/">Home</BreadcrumbItem>
+        <BreadcrumbItem href="/web-app">Web App</BreadcrumbItem>
+      </Breadcrumbs>
       <h1 className="text-3xl font-bold text-center mb-8">
         Web App Admin Panel
       </h1>

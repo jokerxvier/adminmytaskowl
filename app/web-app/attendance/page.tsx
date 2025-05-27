@@ -18,6 +18,7 @@ import {
 
 import { getAttendance } from "@/app/api/attendance-service";
 import { searchOrg } from "@/app/api/organization-service";
+import { Breadcrumbs, BreadcrumbItem } from "@heroui/breadcrumbs";
 
 export default function AttendancePage() {
   const [query, setQuery] = useState("");
@@ -103,6 +104,11 @@ export default function AttendancePage() {
 
   return (
     <div className=" p-4 space-y-4">
+      <Breadcrumbs className="mb-4" radius="full" variant="solid">
+        <BreadcrumbItem href="/">Home</BreadcrumbItem>
+        <BreadcrumbItem href="/web-app">Web App</BreadcrumbItem>
+        <BreadcrumbItem>Attendance</BreadcrumbItem>
+      </Breadcrumbs>
       <Input
         label="Search Organization"
         placeholder="Start typing..."

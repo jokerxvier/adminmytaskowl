@@ -28,6 +28,7 @@ import {
   toggleDisableScreenshot,
   getAvailableDates,
 } from "@/app/api/screenshot-service";
+import { BreadcrumbItem, Breadcrumbs } from "@heroui/breadcrumbs";
 
 export default function ScreenshotPage() {
   const [query, setQuery] = useState("");
@@ -221,6 +222,11 @@ export default function ScreenshotPage() {
         }}
       />
       <div className="flex flex-col w-full h-full">
+        <Breadcrumbs className="mb-4" radius="full" variant="solid">
+        <BreadcrumbItem href="/">Home</BreadcrumbItem>
+        <BreadcrumbItem href="/web-app">Web App</BreadcrumbItem>
+        <BreadcrumbItem>Screenshots</BreadcrumbItem>
+      </Breadcrumbs>
         <h1 className="text-2xl font-bold">Screenshots</h1>
         <div className="flex flex-row gap-4 items-center mb-4">
           <Input

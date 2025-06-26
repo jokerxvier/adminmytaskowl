@@ -54,3 +54,30 @@ export async function totalNewUsersThisMonth() {
 export async function totalNewOrganizationsThisMonth() {
   return fetchWithAuth("totalNewOrganizationsThisMonth");
 }
+
+
+export async function countTableData(table: string): Promise<number> {
+  const token = getTokenFromCookies();
+
+  if (!token) {
+    throw new Error("Unauthorized: No access token found.");
+  }
+
+  const res = await fetch(`${GlobalSettings.BASE_URL}super-admin/countTableData`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ tableKey: table }),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data?.message || "Failed to fetch data.");
+  }
+
+  return data.response;
+}
+

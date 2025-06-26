@@ -1,10 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
 
-import { countDuplicates as fetchDuplicateCounts } from "@/app/api/cleanup-service";
-import {CircularProgress} from "@heroui/progress";
+import { countDuplicates as fetchDuplicateCounts, cleanupDuplicates, deleteDuplicatesFromDB } from "@/app/api/cleanup-service";
+import {  } from "@/app/api/cleanup-service";
 import { Spinner } from "@heroui/spinner";
 import { MdCleaningServices } from "react-icons/md";
+import { addToast } from "@heroui/toast";
+import { PasswordVerifyModal } from "@/components/verifyPassword";
+import { FaTrash } from "react-icons/fa";
 
 export default function cleanupPage(){
   
@@ -13,7 +16,21 @@ export default function cleanupPage(){
   const [userTaskCount, setUserTaskCount] = useState<number |null>(null);
   const [userProjectCount, setUserProjectCount] = useState<number |null>(null);
   const [userTeamCount, setUserTeamCount] = useState<number |null>(null);
-    
+  const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
+  
+  const [pendingAction, setPendingAction] = useState<{
+    action: () => Promise<void>;
+    description: string;
+  } | null>(null);  
+
+  const requirePasswordVerification = (
+    action: () => Promise<void>,
+    description: string,
+  ) => {
+    setPendingAction({ action, description });
+    setIsVerifyModalOpen(true);
+  };
+
   // ✅ Unique name
   const loadDuplicates = async () => {
     setLoading(true);
@@ -31,6 +48,66 @@ export default function cleanupPage(){
     } finally {
       setLoading(false);
     }
+  };
+
+    const cleanupDuplicate = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await cleanupDuplicates();
+
+      if(data.status === 'success'){
+            setLoading(false);
+            loadDuplicates();
+            addToast({
+              title: "Duplicates Cleaned Up",
+              timeout: 3000,
+              shouldShowTimeoutProgress: true,
+              color: "success",
+            });
+      }else{
+        setError(
+        "An error occurred while cleaning up duplicates.",
+      );
+      }
+    } catch (err: any) {
+      setError(
+        err.message || "An error occurred while fetching duplicates.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteDuplicates = () => {
+    requirePasswordVerification(async () => {
+      setLoading(true);
+      setError(null);
+          try {
+          const data = await deleteDuplicatesFromDB();
+
+          if(data.status === 'success'){
+                setLoading(false);
+                loadDuplicates();
+                addToast({
+                  title: "Duplicates Deleted in Database",
+                  timeout: 3000,
+                  shouldShowTimeoutProgress: true,
+                  color: "success",
+                });
+          }else{
+            setError(
+            "An error occurred while cleaning up duplicates.",
+          );
+          }
+        } catch (err: any) {
+          setError(
+            err.message || "An error occurred while fetching duplicates.",
+          );
+        } finally {
+          setLoading(false);
+        }
+    }, "Delete Duplicates on Database? Deleting data from database can't be reversed!");
   };
 
   useEffect(() => {
@@ -65,8 +142,8 @@ return (
         />
       </div>
     )}
-    <div className="px-4 pt-24">
-      <h1 className="text-2xl text-center font-bold mb-6">Duplicates</h1>
+    <div className=" p-12 bg-indigo-500 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 ">
+      <h1 className="text-2xl text-center font-bold mb-6 text-white">Duplicates</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {tables.map((table, index) => (
           <div
@@ -75,24 +152,51 @@ return (
             role="button"
             tabIndex={0}
           >
-            <h3 className="text-gray-700 text-xl font-semibold mb-2">
+            <h3 className="text-gray-700 text-xl font-semibold mb-2 text-center">
               {table.table_name}: {table.count ?? "..."}
             </h3>
           </div>
         ))}
       </div>
-      <div
-        className="mt-4 mx-auto p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 w-1/2 bg-success "
-        role="button"
-        tabIndex={0}
-      >
-        <span className="flex justify-center items-center gap-2 text-white text-lg font-medium">
-          Cleanup Duplicates
-          <MdCleaningServices />
-        </span>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-2">
+
+        <div
+          className="mt-4 mx-auto p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 w-full bg-success "
+          role="button"
+          tabIndex={0}
+          onClick={() => cleanupDuplicate()}
+        >
+          <span className="flex justify-center items-center gap-2 text-white text-lg font-medium">
+            Cleanup Duplicates
+            <MdCleaningServices />
+          </span>
+        </div>
+        <div
+          className="mt-4 mx-auto p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300  w-full bg-danger "
+          role="button"
+          tabIndex={0}
+          onClick={() => deleteDuplicates()}
+        >
+          <span className="flex justify-center items-center gap-2 text-white text-lg font-medium">
+            Delete Duplicates from DB
+            <FaTrash />
+          </span>
+        </div>
       </div>
     </div>
+    <PasswordVerifyModal
+            description={pendingAction?.description || ""}
+            isOpen={isVerifyModalOpen}
+            title="Confirm Action"
+            onOpenChange={setIsVerifyModalOpen}
+            onVerified={() => {
+              if (pendingAction) {
+                pendingAction.action();
+              }
+            }}
+          />
   </div>
+  
 );
 
 

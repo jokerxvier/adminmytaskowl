@@ -89,6 +89,12 @@ export default function WebApp() {
       className: "md:col-span-2 bg-black-900  cursor-not-allowed",
       link: "/web-app/timelogs",
     },
+        {
+      title: "Cleanup",
+      description: "Cleanup duplicate entries.",
+      className: 'md:col-span-2 bg-gradient-to-br from-blue-50 to-blue-100 cursor-pointer',
+      link: "/web-app/cleanup",
+    },
   ];
 
   return (

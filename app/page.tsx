@@ -9,7 +9,7 @@ import Link from "next/link";
 
 import HetznerMetrics from "@/components/hetzner-metrics";
 import SuperAdminDashboard from "@/components/DashboardCount";
-
+import TableCountComponent from "@/components/tableCount";
 export default async function Home() {
   // Await the cookies
   const cookiesData = await cookies();
@@ -61,6 +61,9 @@ export default async function Home() {
       </section>
       <section>
         <SuperAdminDashboard />
+      </section>
+      <section>
+        <TableCountComponent/>
       </section>
     </section>
   );

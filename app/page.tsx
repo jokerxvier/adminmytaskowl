@@ -30,7 +30,7 @@ export default async function Home() {
           Greeting, Super Admin
         </h1>
         <p className="mt-2 text-gray-500 dark:text-gray-400 text-base sm:text-lg">
-          What would you like to work on today boss?
+          What would you like to work on today boss? test
         </p>
       </div>
 

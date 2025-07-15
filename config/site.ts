@@ -14,6 +14,11 @@ export const siteConfig = {
       href: "/web-app",
       icon: "FaAngular",
     },
+    {
+      label: "Beta Program",
+      href: "/beta",
+      icon: "GrTest",
+    },
   ],
   navMenuItems: [
     {
@@ -23,6 +28,10 @@ export const siteConfig = {
     {
       label: "Web App",
       href: "/web-app",
+    },
+        {
+      label: "Beta Program",
+      href: "/beta",
     },
   ],
   links: {

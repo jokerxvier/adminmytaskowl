@@ -1,6 +1,7 @@
 "use client";
 
 import OrganizationSearch from "@/components/edit_organization";
+import OrganizationTable from "@/components/orgTable";
 import { Breadcrumbs, BreadcrumbItem } from "@heroui/breadcrumbs";
 
 export default function Organization() {
@@ -17,6 +18,9 @@ export default function Organization() {
           Manage organizations, teams, roles, and permissions.
         </p>
         <OrganizationSearch />
+      </div>
+      <div className="flex flex-col w-full h-full">
+        <OrganizationTable />
       </div>
     </div>
   );

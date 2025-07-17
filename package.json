@@ -28,14 +28,14 @@
     "@heroui/navbar": "2.2.15",
     "@heroui/pagination": "^2.2.15",
     "@heroui/progress": "^2.2.13",
-    "@heroui/radio": "^2.3.18",
+    "@heroui/radio": "^2.3.23",
     "@heroui/select": "^2.4.17",
     "@heroui/snippet": "2.2.18",
     "@heroui/spinner": "^2.2.14",
     "@heroui/switch": "2.2.15",
-    "@heroui/system": "2.4.13",
+    "@heroui/system": "^2.4.19",
     "@heroui/table": "^2.2.16",
-    "@heroui/theme": "2.4.13",
+    "@heroui/theme": "^2.4.19",
     "@heroui/toast": "^2.0.9",
     "@heroui/tooltip": "^2.2.14",
     "@heroui/user": "^2.2.13",
@@ -56,6 +56,7 @@
   "devDependencies": {
     "@next/eslint-plugin-next": "15.0.4",
     "@react-types/shared": "3.25.0",
+    "@tailwindcss/postcss": "^4.1.11",
     "@types/node": "20.5.7",
     "@types/react": "18.3.3",
     "@types/react-dom": "18.3.0",
@@ -76,7 +77,7 @@
     "postcss": "8.4.49",
     "prettier": "3.3.3",
     "tailwind-variants": "0.3.0",
-    "tailwindcss": "3.4.16",
+    "tailwindcss": "^4.1.11",
     "typescript": "5.6.3"
   }
 }

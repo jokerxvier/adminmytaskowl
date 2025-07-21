@@ -59,6 +59,7 @@ export default function OrganizationTable() {
             <TableColumn>User Count</TableColumn>
             <TableColumn>Owner</TableColumn>
             <TableColumn>Created At</TableColumn>
+            <TableColumn>Total Time Spent</TableColumn>
             <TableColumn>Invitation Code</TableColumn>
           </TableHeader>
           <TableBody>
@@ -78,6 +79,7 @@ export default function OrganizationTable() {
                     minute: "2-digit",
                   })}
                 </TableCell>
+                <TableCell>{org.total_time_spent}</TableCell>
                 <TableCell>{org.invitation_code}</TableCell>
               </TableRow>
             ))}

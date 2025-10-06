@@ -40,3 +40,33 @@ export async function registerUserBeta(name:string, email: string, usersCount: n
 
   return await res.json();
 }
+
+export async function getInvitedUsers() {
+  const token = getTokenFromCookies();
+
+  if (!token) {
+    throw new Error("Unauthorized: No access token found.");
+  }
+
+  const res = await fetch(
+    `${GlobalSettings.BASE_URL}super-admin/getInvitedUsers`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        'Accept': 'application/json',
+
+      },
+
+    },
+  );
+
+  if (!res.ok) {
+    const errorData = await res.json();
+
+    throw new Error(errorData?.message || "Failed to retrieve invited users");
+  }
+
+  return await res.json();
+}

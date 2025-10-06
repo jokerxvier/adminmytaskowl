@@ -49,8 +49,8 @@ const InvitedUsers: React.FC = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-semibold mb-4">Organizations Table</h2>
-      <p className="text-gray-600">View all organizations in the database.</p>
+      <h2 className="text-xl font-semibold mb-4">Invited Users Table</h2>
+      <p className="text-gray-600">View all invited users for beta in the database.</p>
       {loading && <p>Loading users...</p>}
       {error && <p className="text-red-500">{error}</p>}
 

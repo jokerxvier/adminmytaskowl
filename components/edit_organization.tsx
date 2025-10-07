@@ -892,6 +892,14 @@ const OrganizationSearch = () => {
             : ""
         }
       />
+        <Input
+        isDisabled={organization.is_active === 0}
+        label="User Limit"
+        value={
+          editableOrg?.user_limit
+            
+        }
+      />
       <Button
         className="w-full"
         color="primary"

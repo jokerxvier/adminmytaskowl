@@ -895,9 +895,11 @@ const OrganizationSearch = () => {
         <Input
         isDisabled={organization.is_active === 0}
         label="User Limit"
+        onChange={(e) => handleInputChange("user_limit", e.target.value)}
+
         value={
           editableOrg?.user_limit
-            
+          
         }
       />
       <Button

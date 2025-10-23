@@ -47,11 +47,11 @@ export default function WebApp() {
       link: "/web-app/organization",
     },
     {
-      title: "Client Management",
+      title: "Announcements",
       description: "Manage clients, contacts, and communication logs.",
-      // className: ' bg-gradient-to-br from-yellow-50 to-yellow-100',
-      className: " bg-black-900 cursor-not-allowed",
-      link: "/web-app/clients",
+      className: ' bg-gradient-to-br from-yellow-50 to-yellow-100',
+      // className: " bg-black-900 cursor-not-allowed",
+      link: "/web-app/announcement",
     },
     {
       title: "Reporting",

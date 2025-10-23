@@ -6,7 +6,7 @@ import { Providers } from "./providers";
 import { ClientLayout } from "./client-layout";
 
 import { siteConfig } from "@/config/site";
-import { fontSans } from "@/config/fonts";
+import { fontSans, fontMono } from "@/config/fonts";
 
 export const metadata: Metadata = {
   title: {
@@ -35,7 +35,7 @@ export default function RootLayout({
     <html suppressHydrationWarning lang="en">
       <head />
       <body
-        className={`min-h-screen bg-background font-sans antialiased ${fontSans.variable}`}
+        className={`min-h-screen bg-background font-sans antialiased ${fontSans.variable} ${fontMono.variable}`}
       >
         <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
           <ClientLayout>{children}</ClientLayout>

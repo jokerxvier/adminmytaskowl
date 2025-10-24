@@ -6,6 +6,8 @@ export const fontSans = FontSans({
   fallback: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
   display: 'swap',
   preload: true,
+  // Add weight specification to fix Google Fonts loading
+  weight: ['400', '500', '600', '700'],
 });
 
 // Use system monospace font for now to avoid font loading issues

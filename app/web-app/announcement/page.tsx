@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Table,
   TableHeader,
@@ -9,13 +9,15 @@ import {
   TableRow,
   TableCell,
 } from "@heroui/table";
-import { getAnnouncements } from "@/app/api/announcement-service";
+import { getAnnouncements, createAnnouncement, updateAnnouncement } from "@/app/api/announcement-service";
 import { Chip } from "@heroui/chip";
 import { Card } from "@heroui/card";
 import { Input, Textarea } from "@heroui/input";
 import { Button } from "@heroui/button";
 import { BreadcrumbItem, Breadcrumbs } from "@heroui/breadcrumbs";
 import { Divider } from "@heroui/divider";
+import exp from "constants";
+import SimpleRichEditor from "@/components/SimpleRichEditor";
 
 export default function AnnouncementPage() {
   const [announcements, setAnnouncements] = useState<any[]>([]);
@@ -24,8 +26,11 @@ export default function AnnouncementPage() {
 
 
   const[title,setTitle] = useState<string | null>(null);
-  const[content,setContent] = useState<string | null>(null);
-  const[imageURL,setImageURL] = useState<string | null>(null);
+  const[content,setContent] = useState<string>("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const[expires_at,setExpiresAt] = useState<string | null>(null);
+  const[redirect_url,setRedirectUrl] = useState<string | null>(null);
 
   const handleGetAnnouncements = async () => {
     try {
@@ -33,6 +38,19 @@ export default function AnnouncementPage() {
       setError(null);
       const announcementData = await getAnnouncements();
       setAnnouncements(announcementData);
+
+      for (const record of announcementData) {
+        if (record.image_url) {
+          const cleanUrl = record.image_url.replace(/\\\//g, "/");
+          record.image_url = cleanUrl;
+        } else {
+          record.image_url = null; // or provide a fallback placeholder
+        }
+
+        console.log("Cleaned Image URL:", record.image_url);
+      }
+
+
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to fetch announcements"
@@ -43,6 +61,55 @@ export default function AnnouncementPage() {
     }
   };
 
+  const handleCreateAnnouncement = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (!title || !content) {
+        setError("Title and Content are required.");
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+
+      await createAnnouncement(title, content, imageFile ?? undefined, expires_at ?? undefined);
+
+      // Refresh the announcements list after creation
+      await handleGetAnnouncements();
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to create announcement"
+      );
+      console.error("Error creating announcement:", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const handleUpdateAnnouncementStatus = async(id:number) => {
+    // To be implemented
+    try {
+      setLoading(true);
+      setError(null);
+      await updateAnnouncement(id);
+      await handleGetAnnouncements();
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to update announcement"
+      );
+      console.error("Error updating announcement:", err);
+    } finally {
+      setLoading(false);
+      await handleGetAnnouncements();
+    }
+  }
+
+
+  const formIsValid =
+   title !== null && title.trim() !== "" && 
+   content !== null && content.trim() !== "" &&
+   imageFile !== null && imageFile !== undefined &&
+   expires_at !== null && expires_at !== undefined;
 
 
   // ✅ Run once after mount
@@ -69,39 +136,60 @@ export default function AnnouncementPage() {
                 <Input
                 placeholder="Enter announcement title"
                 variant="bordered"
+                onChange={(e) => setTitle(e.target.value)}
                 />
             </div>
             
             <div className="mb-4">
                 <label className="block mb-2 text-sm font-medium">Content:</label>
-                <Textarea
-                placeholder="Enter announcement content"
-                variant="bordered"
-                minRows={3}
-                />
+                  <SimpleRichEditor
+                    content={content}
+                    onChange={(value) => setContent(value)}
+                    placeholder="Enter announcement content..."
+                  />
+                <div>
+                  <div className="mt-2 text-xs text-gray-500">
+                    HTML tags are supported: &lt;b&gt;bold&lt;/b&gt;, &lt;i&gt;italic&lt;/i&gt;, &lt;p&gt;paragraph&lt;/p&gt;, etc.
+                  </div>
+                </div>
             </div>
             
-            <div className="mb-4">
-                <label className="block mb-2 text-sm font-medium">Image:</label>
-                <Input
-                type="file"
-                accept="image/*"
-                variant="bordered"
+            {imagePreview && (
+              <div className="mt-3">
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="w-32 h-32 object-cover rounded-lg border"
+                />
+              </div>
+            )}
+            <Input
+              type="file"
+              accept="image/*"
+              variant="bordered"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  setImageFile(file);
+                  setImagePreview(URL.createObjectURL(file)); // 👈 create preview URL
+                }
+              }}
+            />
 
-                />
-            </div>
-            
+            <Input type="text" placeholder="Redirect URL (optional)" variant="bordered" onChange={(e) => setRedirectUrl(e.target.value)} />
+
             <div className="mb-4">
                 <label className="block mb-2 text-sm font-medium">Expiration Date:</label>
                 <Input
                 type="datetime-local"
                 variant="bordered"
+                onChange={(e) => setExpiresAt(e.target.value)}  
                 />
             </div>
 
             <Divider className="my-4" />
-            
-            <Button color="primary" type="submit" >
+
+            <Button color="primary" type="submit" isDisabled={!formIsValid} onClick={handleCreateAnnouncement}>
                 Create Announcement
             </Button>
             </form>
@@ -142,7 +230,9 @@ export default function AnnouncementPage() {
 
                         </TableCell>
                     <TableCell>{record.title}</TableCell>
-                    <TableCell>{record.content}</TableCell>
+                    <TableCell>
+                      <div dangerouslySetInnerHTML={{ __html: record.content }} />
+                      </TableCell>
                     <TableCell>
                       {record.image_url ? (
                         <img
@@ -156,7 +246,7 @@ export default function AnnouncementPage() {
                     </TableCell>
                     <TableCell>{record.expires_at ?? "N/A"}</TableCell>
                     <TableCell>{record.created_at}</TableCell>
-                    <TableCell><Button color={record.is_active === 1 ? "danger" : "success"}>
+                    <TableCell><Button color={record.is_active === 1 ? "danger" : "success"} onClick={() => handleUpdateAnnouncementStatus(record.id)}  >
                         {record.is_active === 1 ? "Deactivate" : "Activate"}
                         </Button></TableCell>
                   </TableRow>

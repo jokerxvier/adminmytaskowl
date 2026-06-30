@@ -9,13 +9,14 @@ import {
   TableRow,
   TableCell,
 } from "@heroui/table";
-import { getAnnouncements, createAnnouncement, updateAnnouncement } from "@/app/api/announcement-service";
+import { getAnnouncements, createAnnouncement, updateAnnouncement, createChatbotAnnouncement } from "@/app/api/announcement-service";
 import { Chip } from "@heroui/chip";
 import { Card } from "@heroui/card";
 import { Input, Textarea } from "@heroui/input";
 import { Button } from "@heroui/button";
 import { BreadcrumbItem, Breadcrumbs } from "@heroui/breadcrumbs";
 import { Divider } from "@heroui/divider";
+import { RadioGroup, Radio } from "@heroui/radio";
 import exp from "constants";
 import SimpleRichEditor from "@/components/SimpleRichEditor";
 
@@ -24,6 +25,8 @@ export default function AnnouncementPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [announcementType, setAnnouncementType] = useState<"web" | "chatbot">("web");
+  const [chatbotMessage, setChatbotMessage] = useState<string>("");
 
   const[title,setTitle] = useState<string | null>(null);
   const[content,setContent] = useState<string>("");
@@ -64,15 +67,33 @@ export default function AnnouncementPage() {
   const handleCreateAnnouncement = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (!title || !content) {
-        setError("Title and Content are required.");
-        return;
-      }
-
       setLoading(true);
       setError(null);
 
-      await createAnnouncement(title, content, imageFile ?? undefined, expires_at ?? undefined);
+      if (announcementType === "chatbot") {
+        if (!chatbotMessage || chatbotMessage.trim() === "") {
+          setError("Chatbot message is required.");
+          setLoading(false);
+          return;
+        }
+        await createChatbotAnnouncement(chatbotMessage);
+        setChatbotMessage(""); // clear form
+      } else {
+        if (!title || !content) {
+          setError("Title and Content are required.");
+          setLoading(false);
+          return;
+        }
+        await createAnnouncement(title, content, imageFile ?? undefined, expires_at ?? undefined);
+        
+        // Clear form
+        setTitle("");
+        setContent("");
+        setImageFile(null);
+        setImagePreview(null);
+        setExpiresAt(null);
+        setRedirectUrl(null);
+      }
 
       // Refresh the announcements list after creation
       await handleGetAnnouncements();
@@ -105,11 +126,12 @@ export default function AnnouncementPage() {
   }
 
 
-  const formIsValid =
-   title !== null && title.trim() !== "" && 
-   content !== null && content.trim() !== "" &&
-   imageFile !== null && imageFile !== undefined &&
-   expires_at !== null && expires_at !== undefined;
+  const formIsValid = announcementType === "chatbot" 
+    ? chatbotMessage.trim() !== ""
+    : (title !== null && title.trim() !== "" && 
+       content !== null && content.trim() !== "" &&
+       imageFile !== null && imageFile !== undefined &&
+       expires_at !== null && expires_at !== undefined);
 
 
   // ✅ Run once after mount
@@ -130,12 +152,25 @@ export default function AnnouncementPage() {
             Create New Announcement:
         </h3>
         <Card className="p-6">
+            <div className="mb-6 flex justify-center">
+              <RadioGroup
+                orientation="horizontal"
+                value={announcementType}
+                onValueChange={(val) => setAnnouncementType(val as "web" | "chatbot")}
+              >
+                <Radio value="web">Web App Announcement</Radio>
+                <Radio value="chatbot">Ollie Chatbot Announcement</Radio>
+              </RadioGroup>
+            </div>
             <form className="space-y-4">
+            {announcementType === "web" ? (
+              <>
             <div className="mb-4">
                 <label className="block mb-2 text-sm font-medium">Title:</label>
                 <Input
                 placeholder="Enter announcement title"
                 variant="bordered"
+                value={title || ""}
                 onChange={(e) => setTitle(e.target.value)}
                 />
             </div>
@@ -176,21 +211,35 @@ export default function AnnouncementPage() {
               }}
             />
 
-            <Input type="text" placeholder="Redirect URL (optional)" variant="bordered" onChange={(e) => setRedirectUrl(e.target.value)} />
+            <Input type="text" placeholder="Redirect URL (optional)" variant="bordered" value={redirect_url || ""} onChange={(e) => setRedirectUrl(e.target.value)} />
 
             <div className="mb-4">
                 <label className="block mb-2 text-sm font-medium">Expiration Date:</label>
                 <Input
                 type="datetime-local"
                 variant="bordered"
+                value={expires_at || ""}
                 onChange={(e) => setExpiresAt(e.target.value)}  
                 />
             </div>
+            </>
+            ) : (
+              <div className="mb-4">
+                <label className="block mb-2 text-sm font-medium">Chatbot Message:</label>
+                <Textarea
+                  placeholder="Enter the message Ollie should announce..."
+                  variant="bordered"
+                  value={chatbotMessage}
+                  onChange={(e) => setChatbotMessage(e.target.value)}
+                  minRows={4}
+                />
+              </div>
+            )}
 
             <Divider className="my-4" />
 
             <Button color="primary" type="submit" isDisabled={!formIsValid} onClick={handleCreateAnnouncement}>
-                Create Announcement
+                Create {announcementType === "web" ? "Web" : "Chatbot"} Announcement
             </Button>
             </form>
         </Card>

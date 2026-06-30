@@ -79,6 +79,32 @@ export async function createAnnouncement(
   return data.response;
 }
 
+export async function createChatbotAnnouncement(message: string) {
+  const token = getTokenFromCookies();
+
+  if (!token) {
+    throw new Error("Unauthorized: No access token found.");
+  }
+
+  const res = await fetch(`${GlobalSettings.BASE_URL}chatbot/createAnnouncement`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ message }),
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData?.message || "Failed to create chatbot announcement.");
+  }
+
+  const data = await res.json();
+  return data.response;
+}
+
 export async function updateAnnouncement(id: number){
   const token = getTokenFromCookies();
 

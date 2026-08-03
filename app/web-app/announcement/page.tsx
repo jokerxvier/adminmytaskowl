@@ -9,7 +9,7 @@ import {
   TableRow,
   TableCell,
 } from "@heroui/table";
-import { getAnnouncements, createAnnouncement, updateAnnouncement, createChatbotAnnouncement } from "@/app/api/announcement-service";
+import { getAnnouncements, createAnnouncement, updateAnnouncement, createChatbotAnnouncement, getChatbotAnnouncements, toggleChatbotAnnouncementStatus } from "@/app/api/announcement-service";
 import { Chip } from "@heroui/chip";
 import { Card } from "@heroui/card";
 import { Input, Textarea } from "@heroui/input";
@@ -25,8 +25,13 @@ export default function AnnouncementPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [chatbotAnnouncements, setChatbotAnnouncements] = useState<any[]>([]);
+  const [chatbotListLoading, setChatbotListLoading] = useState(false);
+
   const [announcementType, setAnnouncementType] = useState<"web" | "chatbot">("web");
   const [chatbotMessage, setChatbotMessage] = useState<string>("");
+  const [chatbotAttachment, setChatbotAttachment] = useState<File | null>(null);
+  const [chatbotAttachmentPreview, setChatbotAttachmentPreview] = useState<string | null>(null);
 
   const[title,setTitle] = useState<string | null>(null);
   const[content,setContent] = useState<string>("");
@@ -76,8 +81,11 @@ export default function AnnouncementPage() {
           setLoading(false);
           return;
         }
-        await createChatbotAnnouncement(chatbotMessage);
+        await createChatbotAnnouncement(chatbotMessage, chatbotAttachment ?? undefined);
         setChatbotMessage(""); // clear form
+        setChatbotAttachment(null);
+        setChatbotAttachmentPreview(null);
+        await handleGetChatbotAnnouncements();
       } else {
         if (!title || !content) {
           setError("Title and Content are required.");
@@ -125,6 +133,36 @@ export default function AnnouncementPage() {
     }
   }
 
+  const handleGetChatbotAnnouncements = async () => {
+    try {
+      setChatbotListLoading(true);
+      const data = await getChatbotAnnouncements();
+      setChatbotAnnouncements(data);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to fetch chatbot announcements"
+      );
+      console.error("Error fetching chatbot announcements:", err);
+    } finally {
+      setChatbotListLoading(false);
+    }
+  };
+
+  const handleToggleChatbotAnnouncementStatus = async (id: number) => {
+    try {
+      setChatbotListLoading(true);
+      await toggleChatbotAnnouncementStatus(id);
+      await handleGetChatbotAnnouncements();
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to update chatbot announcement"
+      );
+      console.error("Error updating chatbot announcement:", err);
+    } finally {
+      setChatbotListLoading(false);
+    }
+  };
+
 
   const formIsValid = announcementType === "chatbot" 
     ? chatbotMessage.trim() !== ""
@@ -137,6 +175,7 @@ export default function AnnouncementPage() {
   // ✅ Run once after mount
   useEffect(() => {
     handleGetAnnouncements();
+    handleGetChatbotAnnouncements();
   }, []);
 
   return (
@@ -227,11 +266,54 @@ export default function AnnouncementPage() {
               <div className="mb-4">
                 <label className="block mb-2 text-sm font-medium">Chatbot Message:</label>
                 <Textarea
-                  placeholder="Enter the message Ollie should announce..."
+                  placeholder="Enter the message Ollie should announce... Use @user to insert the recipient's name."
                   variant="bordered"
                   value={chatbotMessage}
                   onChange={(e) => setChatbotMessage(e.target.value)}
+                  onPaste={(e) => {
+                    const items = e.clipboardData?.items;
+                    if (items) {
+                      for (let i = 0; i < items.length; i++) {
+                        if (items[i].type.indexOf("image") !== -1) {
+                          const file = items[i].getAsFile();
+                          if (file) {
+                            setChatbotAttachment(file);
+                            setChatbotAttachmentPreview(URL.createObjectURL(file));
+                            break;
+                          }
+                        }
+                      }
+                    }
+                  }}
                   minRows={4}
+                />
+                <div className="mt-2 text-xs text-gray-500">
+                  Tip: include <code>@user</code> in the message and it will be replaced with each recipient&apos;s name.
+                </div>
+
+                {chatbotAttachmentPreview && (
+                  <div className="mt-3">
+                    <img
+                      src={chatbotAttachmentPreview}
+                      alt="Attachment Preview"
+                      className="w-32 h-32 object-cover rounded-lg border"
+                    />
+                  </div>
+                )}
+
+                <label className="block mt-4 mb-2 text-sm font-medium">Attachment (optional):</label>
+                <Input
+                  type="file"
+                  variant="bordered"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] ?? null;
+                    setChatbotAttachment(file);
+                    if (file && file.type.startsWith("image/")) {
+                      setChatbotAttachmentPreview(URL.createObjectURL(file));
+                    } else {
+                      setChatbotAttachmentPreview(null);
+                    }
+                  }}
                 />
               </div>
             )}
@@ -249,7 +331,7 @@ export default function AnnouncementPage() {
         {loading && <p>Loading announcements...</p>}
         {error && <p className="text-red-500">{error}</p>}
 
-        {announcements.length > 0 && (
+        {announcementType === "web" && announcements.length > 0 && (
           <div className="mt-4">
             <h3 className="text-lg text-center font-medium my-8">
               Announcements on DB:
@@ -298,6 +380,60 @@ export default function AnnouncementPage() {
                     <TableCell><Button color={record.is_active === 1 ? "danger" : "success"} onClick={() => handleUpdateAnnouncementStatus(record.id)}  >
                         {record.is_active === 1 ? "Deactivate" : "Activate"}
                         </Button></TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+
+        {announcementType === "chatbot" && chatbotListLoading && <p>Loading chatbot announcements...</p>}
+
+        {announcementType === "chatbot" && chatbotAnnouncements.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-lg text-center font-medium my-8">
+              Chatbot Announcements on DB:
+            </h3>
+
+            <Table aria-label="Chatbot announcements table">
+              <TableHeader>
+                <TableColumn>ID</TableColumn>
+                <TableColumn>Status</TableColumn>
+                <TableColumn>Message</TableColumn>
+                <TableColumn>Attachment</TableColumn>
+                <TableColumn>Created at</TableColumn>
+                <TableColumn>Action</TableColumn>
+              </TableHeader>
+              <TableBody>
+                {chatbotAnnouncements.map((record) => (
+                  <TableRow key={record.id}>
+                    <TableCell>{record.id}</TableCell>
+                    <TableCell>
+                      <Chip color={record.is_active ? "success" : "danger"}>
+                        {record.is_active ? "Active" : "Inactive"}
+                      </Chip>
+                    </TableCell>
+                    <TableCell>
+                      <div className="whitespace-pre-wrap">{record.message}</div>
+                    </TableCell>
+                    <TableCell>
+                      {record.attachment_url ? (
+                        <a href={record.attachment_url} target="_blank" rel="noopener noreferrer">
+                          View
+                        </a>
+                      ) : (
+                        "N/A"
+                      )}
+                    </TableCell>
+                    <TableCell>{record.created_at}</TableCell>
+                    <TableCell>
+                      <Button
+                        color={record.is_active ? "danger" : "success"}
+                        onClick={() => handleToggleChatbotAnnouncementStatus(record.id)}
+                      >
+                        {record.is_active ? "Deactivate" : "Activate"}
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

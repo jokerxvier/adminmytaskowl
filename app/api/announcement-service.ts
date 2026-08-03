@@ -79,21 +79,25 @@ export async function createAnnouncement(
   return data.response;
 }
 
-export async function createChatbotAnnouncement(message: string) {
+export async function createChatbotAnnouncement(message: string, attachmentFile?: File) {
   const token = getTokenFromCookies();
 
   if (!token) {
     throw new Error("Unauthorized: No access token found.");
   }
 
+  const formData = new FormData();
+  formData.append("message", message);
+  if (attachmentFile) formData.append("attachment", attachmentFile);
+
   const res = await fetch(`${GlobalSettings.BASE_URL}chatbot/createAnnouncement`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
-      "Content-Type": "application/json",
+      // ⚠️ DO NOT manually set "Content-Type" here — browser will auto-set it with correct boundary
     },
-    body: JSON.stringify({ message }),
+    body: formData,
   });
 
   if (!res.ok) {
@@ -131,4 +135,54 @@ export async function updateAnnouncement(id: number){
 
   const data = await res.json();
   return data.response;
+}
+
+export async function getChatbotAnnouncements() {
+  const token = getTokenFromCookies();
+
+  if (!token) {
+    throw new Error("Unauthorized: No access token found.");
+  }
+
+  const res = await fetch(`${GlobalSettings.BASE_URL}super-admin/getChatbotAnnouncements`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData?.message || "Failed to fetch chatbot announcements.");
+  }
+
+  const data = await res.json();
+  return data.response;
+}
+
+export async function toggleChatbotAnnouncementStatus(id: number) {
+  const token = getTokenFromCookies();
+
+  if (!token) {
+    throw new Error("Unauthorized: No access token found.");
+  }
+
+  const res = await fetch(
+    `${GlobalSettings.BASE_URL}super-admin/toggleChatbotAnnouncementStatus/${id}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    },
+  );
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData?.message || "Failed to update chatbot announcement.");
+  }
+
+  return await res.json();
 }
